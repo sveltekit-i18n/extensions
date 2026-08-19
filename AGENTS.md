@@ -65,3 +65,8 @@ you notice it's possible.
 - Memoize per instance (`WeakMap`) so double application is harmless.
 - Extension packages must not break when applied directly
   (`extension(new I18n(config))`) — tests call them that way.
+
+## Comments
+
+If you need a paragraph-long comment to justify why the workaround is OK,
+the code is wrong — fix the code.
