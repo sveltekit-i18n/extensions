@@ -17,7 +17,25 @@ An extension can augment the instance (attach new capabilities) or replace it en
 
 ## Available Extensions
 
-See the per-package READMEs for installation and usage.
+### [@sveltekit-i18n/extension-stores](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores)
+
+Replaces the runes-based instance with the Svelte-store surface known from sveltekit-i18n v2 (`$t`, `$locale`, `$loading`, ...), plus pass-through methods and an `instance` escape hatch.
+
+```sh
+npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-stores
+```
+
+```ts
+import I18n from '@sveltekit-i18n/base';
+import stores from '@sveltekit-i18n/extension-stores';
+
+export const { t, locale, loading, loadTranslations } = new I18n({
+  ...config,
+  extensions: [stores],
+});
+```
+
+See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores#readme) for the full output reference and v2 migration notes.
 
 ## Creating Custom Extensions
 
