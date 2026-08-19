@@ -28,7 +28,7 @@ the [sveltekit-i18n](https://github.com/sveltekit-i18n/lib) ecosystem
   each `extension-*/` directory is a fully standalone npm package with its own
   `package.json`, lockfile, configs, tests, README, LICENSE, and CHANGELOG.
 - The root holds only `README.md` (extension pipe overview + package index),
-  this file, `.gitignore`, and `.github/workflows/`.
+  this file, `CLAUDE.md`, `.gitignore`, and `.github/workflows/`.
 
 ## Tech stack (per package — same as `base`)
 
