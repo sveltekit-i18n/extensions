@@ -48,8 +48,12 @@ Install order inside a package therefore is:
 npm run setup:base && npm install
 ```
 
-Once `base` v3 is on npm, swap the `file:` dev dependency for a registry
-version and delete the setup script — flag this when you notice it's possible.
+The bootstrap is branch-only scaffolding and must never reach `master`
+(base §7: master carries only finished product). A package PR that depends on
+it stays a **draft** until `base` v3 is on npm; its final pre-merge commit
+swaps the `file:` dev dependency for the registry version and deletes the
+setup script plus the workflow's "Setup base" step. Flag the swap the moment
+you notice it's possible.
 
 ## Extension contract you must respect
 
