@@ -1,0 +1,71 @@
+{
+  "name": "@sveltekit-i18n/extension-stores",
+  "version": "3.0.0-next.0",
+  "description": "Svelte store consumption mode for @sveltekit-i18n/base.",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "dev": "svelte-package -i src -o dist -w",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "pretest": "npm run build && npm run typecheck",
+    "test": "vitest run",
+    "build": "svelte-package -i src -o dist",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint --fix ."
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/sveltekit-i18n/extensions.git",
+    "directory": "extension-stores"
+  },
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "i18n",
+    "l10n",
+    "internationalization",
+    "localization",
+    "translation",
+    "stores"
+  ],
+  "author": "Jarda Svoboda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sveltekit-i18n/lib/issues"
+  },
+  "homepage": "https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores#readme",
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "@sveltekit-i18n/base": "^3.0.0-next.0",
+    "svelte": ">=5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@sveltejs/package": "^2.5.8",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@sveltekit-i18n/base": "^3.0.0-next.0",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "eslint-plugin-import-x": "^4.17.1",
+    "globals": "^17.11.0",
+    "svelte": "^5.56.9",
+    "typescript": "^5.1.6",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.10"
+  },
+  "svelte": "./dist/index.js"
+}

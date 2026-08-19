@@ -36,24 +36,13 @@ TypeScript ESM (`"type": "module"`, `strict`), npm with `package-lock.json`,
 `svelte-package` build to `dist/`, Vitest + `vite-plugin-svelte`, ESLint 10
 flat config, Node 22+, `svelte >=5` peer.
 
-## The `@sveltekit-i18n/base` dev dependency
+## The `@sveltekit-i18n/base` dependency
 
-`base` v3 is not published yet, so packages depend on it via
-`"@sveltekit-i18n/base": "file:.base"`, where `.base/` is a **gitignored,
-locally built clone** produced by `npm run setup:base` (see
-`scripts/setup-base.mjs`; `BASE_REF` selects the branch, default `master`).
-Install order inside a package therefore is:
-
-```sh
-npm run setup:base && npm install
-```
-
-The bootstrap is branch-only scaffolding and must never reach `master`
-(base §7: master carries only finished product). A package PR that depends on
-it stays a **draft** until `base` v3 is on npm; its final pre-merge commit
-swaps the `file:` dev dependency for the registry version and deletes the
-setup script plus the workflow's "Setup base" step. Flag the swap the moment
-you notice it's possible.
+`base` is a **peer dependency** — the consumer brings the instance an extension
+wraps, so a package must never bundle its own copy. The same range is mirrored
+in `devDependencies` to build and test against. Until base v3 is stable the
+range carries the prerelease tag (`^3.0.0-next.0`); a plain `^3.0.0` would not
+match a `-next` version. `npm install` inside a package is the whole setup.
 
 ## Extension contract you must respect
 
