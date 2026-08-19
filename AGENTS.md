@@ -65,10 +65,3 @@ you notice it's possible.
 - Memoize per instance (`WeakMap`) so double application is harmless.
 - Extension packages must not break when applied directly
   (`extension(new I18n(config))`) — tests call them that way.
-
-## Versioning
-
-The whole sveltekit-i18n family starts aligned at **3.0.0**; afterwards each
-package versions independently. Compatibility is expressed through
-`peerDependencies` ranges (widen, e.g. `^3 || ^4`, rather than releasing an
-identical new major).
