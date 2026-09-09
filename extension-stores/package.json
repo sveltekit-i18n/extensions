@@ -1,6 +1,6 @@
 {
   "name": "@sveltekit-i18n/extension-stores",
-  "version": "3.0.0-next.0",
+  "version": "3.0.0-next.1",
   "description": "Svelte store consumption mode for @sveltekit-i18n/base.",
   "type": "module",
   "types": "./dist/index.d.ts",
