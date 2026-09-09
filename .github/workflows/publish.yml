@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     defaults:
       run:
         working-directory: extension-stores
@@ -57,6 +58,11 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org/
 
+      # Trusted publishing needs npm 11.5.1 or newer; the npm bundled with a
+      # Node release is not guaranteed to be one.
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm ci
 
@@ -80,9 +86,9 @@ jobs:
       - name: Push release commit and tag
         run: git push --atomic origin HEAD:${{ github.ref_name }} '${{ steps.bump.outputs.tag }}'
 
+      # No token: the registry authenticates the workflow itself over OIDC and
+      # attaches provenance in the same step.
       - name: Publish package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --tag ${{ inputs.tag }}
 
       # Last: publishing is irreversible, so a release must never announce a
