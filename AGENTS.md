@@ -40,9 +40,10 @@ flat config, Node 22+, `svelte >=5` peer.
 
 `base` is a **peer dependency** — the consumer brings the instance an extension
 wraps, so a package must never bundle its own copy. The same range is mirrored
-in `devDependencies` to build and test against. Until base v3 is stable the
-range carries the prerelease tag (`^3.0.0-next.0`); a plain `^3.0.0` would not
-match a `-next` version. `npm install` inside a package is the whole setup.
+in `devDependencies` to build and test against. The range is `^3.0.0`, and it
+stays off the prerelease tag: `^3.0.0-next.0` would also admit base's own
+prereleases, which this line is not built against. `npm install` inside a
+package is the whole setup.
 
 ## Extension contract you must respect
 
