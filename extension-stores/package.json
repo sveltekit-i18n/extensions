@@ -44,7 +44,7 @@
   "bugs": {
     "url": "https://github.com/sveltekit-i18n/lib/issues"
   },
-  "homepage": "https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores#readme",
+  "homepage": "https://sveltekit-i18n.github.io",
   "engines": {
     "node": ">=22"
   },

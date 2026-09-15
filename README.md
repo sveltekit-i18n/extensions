@@ -61,6 +61,12 @@ Guidelines:
 
 See the [`@sveltekit-i18n/base` docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for the full `extensions` reference.
 
+## Documentation
+
+- 🌐 [sveltekit-i18n.github.io](https://sveltekit-i18n.github.io) – The documentation site, with a live playground
+- 📖 [@sveltekit-i18n/base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) – The core, and the `extensions` reference
+- 📚 [Documentation Index](https://github.com/sveltekit-i18n/lib/tree/master/docs/INDEX.md) – Guides, tutorials and best practices
+
 ## Issues
 
 This repository is a part of the [sveltekit-i18n](https://github.com/sveltekit-i18n/lib) ecosystem. Please report issues [here](https://github.com/sveltekit-i18n/lib/issues).

@@ -64,6 +64,12 @@ The store shape matches sveltekit-i18n v2 with these differences:
 - `loading.toPromise()` was removed — await `loadTranslations` / `setLocale` / `setRoute` directly.
 - `locale.forceSet()` was removed — use `invalidate()` plus `setLocale()`.
 
+## Documentation
+
+- 🌐 [sveltekit-i18n.github.io](https://sveltekit-i18n.github.io) – The documentation site, with a live playground
+- 📖 [@sveltekit-i18n/base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) – The core, and the `extensions` reference
+- 📚 [Documentation Index](https://github.com/sveltekit-i18n/lib/tree/master/docs/INDEX.md) – Guides, tutorials and best practices
+
 ## Issues
 
 Please report issues [here](https://github.com/sveltekit-i18n/lib/issues).
