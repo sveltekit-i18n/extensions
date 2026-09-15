@@ -70,3 +70,8 @@ See the [`@sveltekit-i18n/base` docs](https://github.com/sveltekit-i18n/base/blo
 ## Issues
 
 This repository is a part of the [sveltekit-i18n](https://github.com/sveltekit-i18n/lib) ecosystem. Please report issues [here](https://github.com/sveltekit-i18n/lib/issues).
+
+## Sponsor
+
+You can support the maintenance of these packages through
+[GitHub Sponsors](https://github.com/sponsors/sveltekit-i18n).

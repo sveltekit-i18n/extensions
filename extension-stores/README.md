@@ -73,3 +73,8 @@ The store shape matches sveltekit-i18n v2 with these differences:
 ## Issues
 
 Please report issues [here](https://github.com/sveltekit-i18n/lib/issues).
+
+## Sponsor
+
+You can support the maintenance of this package through
+[GitHub Sponsors](https://github.com/sponsors/sveltekit-i18n).
