@@ -122,7 +122,7 @@ describe('stores extension', () => {
       ...CONFIG,
       loaders: [
         {
-          key: 'lazy',
+          namespace: 'lazy',
           locale: 'de',
           loader: async () => ({ hi: 'Hallo!' }),
         },
@@ -149,7 +149,7 @@ describe('stores extension', () => {
       log: CONFIG.log,
       loaders: [
         {
-          key: 'about',
+          namespace: 'about',
           locale: 'en',
           routes: ['/about'],
           loader: async () => ({ title: 'About us' }),
@@ -184,7 +184,7 @@ describe('stores extension', () => {
       log: CONFIG.log,
       loaders: [
         {
-          key: 'lazy',
+          namespace: 'lazy',
           locale: 'en',
           loader: async () => {
             calls += 1;
