@@ -19,12 +19,14 @@ export interface Stores<I extends AnyI18n = AnyI18n> {
 
 export interface Output<I extends AnyI18n = AnyI18n> extends Stores<I> {
   loadTranslations: I['loadTranslations'];
+  loadNamespace: I['loadNamespace'];
   setLocale: I['setLocale'];
   setRoute: I['setRoute'];
   loadConfig: I['loadConfig'];
   addTranslations: I['addTranslations'];
   invalidate: I['invalidate'];
   snapshot: I['snapshot'];
+  hydrate: I['hydrate'];
   destroy: I['destroy'];
   instance: I;
 }
@@ -62,12 +64,14 @@ const stores = <I extends AnyI18n>(i18n: I): Output<I> => {
     translations: withGet(toStore(() => i18n.translations), () => i18n.translations),
     rawTranslations: withGet(toStore(() => i18n.rawTranslations), () => i18n.rawTranslations),
     loadTranslations: i18n.loadTranslations,
+    loadNamespace: i18n.loadNamespace,
     setLocale: i18n.setLocale,
     setRoute: i18n.setRoute,
     loadConfig: i18n.loadConfig,
     addTranslations: i18n.addTranslations,
     invalidate: i18n.invalidate,
     snapshot: i18n.snapshot,
+    hydrate: i18n.hydrate,
     destroy: i18n.destroy,
     instance: i18n,
   };
