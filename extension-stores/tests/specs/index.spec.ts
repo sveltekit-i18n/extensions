@@ -215,6 +215,104 @@ describe('stores extension', () => {
     l.unsubscribe();
   });
 
+  it('keeps the namespace `invalidate` is handed', async () => {
+    const calls = { a: 0, b: 0 };
+    const output = stores(new I18n({
+      initLocale: 'en',
+      parser: CONFIG.parser,
+      log: CONFIG.log,
+      loaders: (['a', 'b'] as const).map((namespace) => ({
+        namespace,
+        locale: 'en',
+        loader: async () => {
+          calls[namespace] += 1;
+
+          return { hi: `${namespace} ${calls[namespace]}` };
+        },
+      })),
+    }));
+
+    await output.loadTranslations('en');
+
+    expect(calls).toEqual({ a: 1, b: 1 });
+
+    const { invalidate } = output;
+
+    invalidate('en', 'a');
+    await output.loadTranslations('en');
+
+    expect(calls).toEqual({ a: 2, b: 1 });
+    expect(output.t.get()('a.hi')).toBe('a 2');
+  });
+
+  it('passes `loadNamespace` through, detached', async () => {
+    const output = stores(new I18n({
+      initLocale: 'en',
+      parser: CONFIG.parser,
+      log: CONFIG.log,
+      translations: { en: { common: { hi: 'Hello!' } } },
+      loaders: [
+        {
+          namespace: 'about',
+          locale: 'cs',
+          routes: ['/about'],
+          loader: async () => ({ title: 'About us' }),
+        },
+      ],
+    }));
+
+    const translations = collect(output.translations);
+    const { loadNamespace } = output;
+
+    // Off its route and off the active locale: only a namespace load for
+    // that locale fetches it, and it switches nothing.
+    await loadNamespace('about', 'cs');
+    flushSync();
+
+    expect(translations.values.at(-1)?.cs['about.title']).toBe('About us');
+    expect(output.locale.get()).toBe('en');
+    translations.unsubscribe();
+  });
+
+  it('hands a snapshot over through `hydrate`, so the client fetches nothing', async () => {
+    const calls = { server: 0, client: 0 };
+    const config = (side: keyof typeof calls): Config.T => ({
+      parser: CONFIG.parser,
+      log: CONFIG.log,
+      loaders: [
+        {
+          namespace: 'common',
+          locale: 'en',
+          loader: async () => {
+            calls[side] += 1;
+
+            return { hi: 'Hello!' };
+          },
+        },
+      ],
+    });
+
+    const server = stores(new I18n(config('server')));
+
+    await server.loadTranslations('en', '/');
+
+    const envelope = server.snapshot({ records: true });
+    const client = stores(new I18n(config('client')));
+    const locale = collect(client.locale);
+    const { hydrate } = client;
+
+    hydrate(envelope);
+    flushSync();
+
+    expect(locale.values.at(-1)).toBe('en');
+    expect(client.t.get()('common.hi')).toBe('Hello!');
+
+    await client.loadTranslations('en', '/');
+
+    expect(calls).toEqual({ server: 1, client: 0 });
+    locale.unsubscribe();
+  });
+
   it('applies through the `config.extensions` pipe', async () => {
     const output = new I18n({ ...CONFIG, extensions: [stores] });
 

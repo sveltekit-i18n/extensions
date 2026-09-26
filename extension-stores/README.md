@@ -42,20 +42,52 @@ Every store also carries a `get()` method for a subscription-free read of the cu
 |-------|------|-------------|
 | `t` | readable | Translation function for the active locale: `$t('key', ...params)`. A fresh function is emitted whenever the translations, the locale or the config change. |
 | `l` | readable | Locale-explicit translation function: `$l('en', 'key', ...params)`. Emitted the same way as `t`. |
-| `locale` | **writable** | The active locale. Setting it (`locale.set('en')`, `$locale = 'en'`) triggers a fire-and-forget locale switch; the store emits once the switch completes. A falsy value is ignored, exactly as it is on the instance. For an awaitable switch, use `setLocale`. |
+| `locale` | **writable** | The active locale. Setting it (`locale.set('en')`, `$locale = 'en'`) triggers a fire-and-forget locale switch; the store emits once the switch completes. A falsy value is ignored, exactly as it is on the instance. A switch that a loader's SvelteKit `redirect()` or `error()` below 500 rejects is only logged: the store stays on the old locale and does not emit, so a `<select bind:value={$locale}>` keeps showing the refused option. For an awaitable switch that receives the rejection, use `setLocale`. |
 | `locales` | readable | All configured locales. |
-| `loading` | readable | `true` while translation loads are in flight. |
+| `loading` | readable | `true` while a load that switches the locale or the route is in flight — `setLocale`, `setRoute`, `loadTranslations` or setting `locale`. `loadNamespace()` and `loadTranslations(…, { activate: false })` do not count; await what they return instead. |
 | `initialized` | readable | `true` once the first translations have been loaded. |
 | `translations` | readable | The loaded translation tables. |
 | `rawTranslations` | readable | The loaded translation tables before preprocessing. |
 
 ### Methods
 
-`loadTranslations`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot` and `destroy` are passed through from the instance, pre-bound — safe to destructure.
+`loadTranslations`, `loadNamespace`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot`, `hydrate` and `destroy` are passed through from the instance, pre-bound — safe to destructure. See the [base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for what each does.
+
+### Server-rendered apps
+
+With SvelteKit, [`@sveltekit-i18n/base/kit`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#sveltekit) does the whole hand-off. Put the extension in the config it wires, and `data.i18n`, `use()` and `get()` hand out the stores; the hook, the layouts and `use()` stay as its setup shows:
+
+```js
+// src/lib/i18n.js
+import { defineI18n } from '@sveltekit-i18n/base/kit';
+import stores from '@sveltekit-i18n/extension-stores';
+
+export const { handle, load, use, get } = defineI18n({ ...config, extensions: [stores] });
+```
+
+```svelte
+<!-- any component below the root layout -->
+<script>
+  import { get } from '$lib/i18n';
+
+  const { t } = get();
+</script>
+
+<p>{$t('common.greeting')}</p>
+```
+
+Wiring it by hand, follow base's [SSR recipe](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#server-side-rendering): `snapshot()` and `hydrate()` are passed through, and a component reads `$t(...)` from the stores where the recipe calls `i18n.t(...)`. Hand the translations over through `hydrate()`, not through `config.translations` or `addTranslations()`: those only seed the tables, so the client fetches them again.
 
 ### `instance`
 
 The untouched `I18n` instance, as an escape hatch to the full runes-based API.
+
+## Upgrading from 3.0
+
+- Requires `@sveltekit-i18n/base` 3.1 or newer. With `sveltekit-i18n`, that is a release built on base 3.1: on one built on 3.0, the instance has no `hydrate` or `loadNamespace` to pass through.
+- `hydrate()` and `loadNamespace()` are passed through, and `invalidate()` takes base 3.1's `namespace` argument.
+- Setting the `locale` store no longer always switches: a switch a loader's `redirect()` or `error()` below 500 rejects leaves the store on the old locale. Use `setLocale` to receive the rejection.
+- Handing translations over through `config.translations` or `addTranslations()` no longer counts as loaded, so the client fetches them again: switch to `hydrate()` (see [Server-rendered apps](#server-rendered-apps)).
 
 ## Migrating from v2
 
