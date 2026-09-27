@@ -99,6 +99,40 @@ describe('stores extension', () => {
     expect(values).toHaveLength(count);
   });
 
+  it('leaves an effect that subscribes independent of the value it subscribes to', async () => {
+    const output = stores(new I18n(CONFIG));
+    const held = collect(output.locale);
+    const { values, destroy } = subscribeInEffect(output.locale);
+
+    flushSync();
+    await output.setLocale('cs');
+    flushSync();
+
+    expect(values).toEqual(['en', 'cs']);
+
+    destroy();
+    held.unsubscribe();
+  });
+
+  it('brings a subscriber back to the current value after it changed and changed back unobserved', async () => {
+    const output = stores(new I18n(CONFIG));
+    const first = collect(output.locale);
+
+    await output.setLocale('cs');
+    flushSync();
+    first.unsubscribe();
+
+    await output.setLocale('en');
+    flushSync();
+
+    const second = collect(output.locale);
+
+    flushSync();
+
+    expect(second.values.at(-1)).toBe('en');
+    second.unsubscribe();
+  });
+
   it('setting the writable `locale` store triggers a locale switch', async () => {
     const output = stores(new I18n(CONFIG));
 
