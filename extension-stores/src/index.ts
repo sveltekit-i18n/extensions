@@ -2,6 +2,8 @@ import { toStore } from 'svelte/store';
 import type { Readable, Writable } from 'svelte/store';
 import type { Extension, I18n } from '@sveltekit-i18n/base';
 
+import { fromInstance } from '#subscribe';
+
 type AnyI18n = I18n<any, any, any, any>;
 
 export type WithGet<Store, Value> = Store & { get: () => Value };
@@ -41,7 +43,7 @@ export interface WithStores extends Extension.Operator {
 
 const cache = new WeakMap<object, Output>();
 
-const withGet = <S extends Readable<unknown>, V>(store: S, get: () => V): WithGet<S, V> => Object.assign(store, { get });
+const withGet = <S extends Readable<V>, V>(store: S, get: () => V): WithGet<S, V> => Object.assign(fromInstance(store, get), { get });
 
 const stores = <I extends AnyI18n>(i18n: I): Output<I> => {
   const memoized = cache.get(i18n);

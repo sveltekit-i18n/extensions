@@ -12,6 +12,13 @@
     },
     "./package.json": "./package.json"
   },
+  "imports": {
+    "#subscribe": {
+      "worker": "./dist/subscribe.js",
+      "browser": "./dist/subscribe.browser.js",
+      "default": "./dist/subscribe.js"
+    }
+  },
   "scripts": {
     "dev": "svelte-package -i src -o dist -w",
     "typecheck": "tsc --noEmit -p tsconfig.json",
