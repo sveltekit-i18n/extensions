@@ -13,7 +13,10 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "types": ["node", "svelte"],
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "#subscribe": ["./src/subscribe.ts"]
+    }
   },
   "include": [
     "./src",

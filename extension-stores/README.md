@@ -78,6 +78,8 @@ export const { handle, load, use, get } = defineI18n({ ...config, extensions: [s
 
 Wiring it by hand, follow base's [SSR recipe](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#server-side-rendering): `snapshot()` and `hydrate()` are passed through, and a component reads `$t(...)` from the stores where the recipe calls `i18n.t(...)`. Hand the translations over through `hydrate()`, not through `config.translations` or `addTranslations()`: those only seed the tables, so the client fetches them again.
 
+On the server, Svelte's stores do not track the instance: a subscription reads its value from the instance when it starts and gets nothing after that. A render therefore shows what the pass had loaded by then — load before rendering, as the `/kit` load and the SSR recipe do.
+
 ### `instance`
 
 The untouched `I18n` instance, as an escape hatch to the full runes-based API.
@@ -87,6 +89,7 @@ The untouched `I18n` instance, as an escape hatch to the full runes-based API.
 - Requires `@sveltekit-i18n/base` 3.1 or newer. With `sveltekit-i18n`, that is a release built on base 3.1: on one built on 3.0, the instance has no `hydrate` or `loadNamespace` to pass through.
 - `hydrate()` and `loadNamespace()` are passed through, and `invalidate()` takes base 3.1's `namespace` argument.
 - Setting the `locale` store no longer always switches: a switch a loader's `redirect()` or `error()` below 500 rejects leaves the store on the old locale. Use `setLocale` to receive the rejection.
+- On the server, a store no longer reports what the instance held when the extension ran, before anything had loaded: each subscription reads the instance when it starts.
 - Handing translations over through `config.translations` or `addTranslations()` no longer counts as loaded, so the client fetches them again: switch to `hydrate()` (see [Server-rendered apps](#server-rendered-apps)).
 
 ## Migrating from v2

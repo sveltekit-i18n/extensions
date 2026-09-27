@@ -6,6 +6,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import stores from '../../src';
 import type { Output } from '../../src';
+import { subscribeInEffect } from '../effects.svelte';
 
 const CONFIG: Config.T = {
   initLocale: 'en',
@@ -55,6 +56,47 @@ describe('stores extension', () => {
 
     expect(values).toEqual(['en', 'cs']);
     unsubscribe();
+  });
+
+  it('brings a subscriber that joins before the flush to the current value', async () => {
+    const output = stores(new I18n(CONFIG));
+    const first = collect(output.locale);
+    const switches = [output.setLocale('cs')];
+    const second = collect(output.locale);
+
+    switches.push(output.setLocale('en'));
+    await Promise.all(switches);
+    flushSync();
+
+    expect(output.instance.locale).toBe('en');
+    expect(first.values.at(-1)).toBe('en');
+    expect(second.values.at(-1)).toBe('en');
+    first.unsubscribe();
+    second.unsubscribe();
+  });
+
+  it('emits to a subscription an effect renews, and stops with the effect', async () => {
+    const output = stores(new I18n(CONFIG));
+    const { values, rerun, destroy } = subscribeInEffect(output.locale);
+
+    flushSync();
+
+    expect(values).toEqual(['en']);
+
+    await output.setLocale('cs');
+    flushSync();
+    rerun();
+    flushSync();
+
+    expect(values.at(-1)).toBe('cs');
+
+    const count = values.length;
+
+    destroy();
+    await output.setLocale('en');
+    flushSync();
+
+    expect(values).toHaveLength(count);
   });
 
   it('setting the writable `locale` store triggers a locale switch', async () => {
