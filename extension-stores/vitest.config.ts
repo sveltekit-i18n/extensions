@@ -41,7 +41,7 @@ export default defineConfig({
           // copies would mean two reactivity runtimes that cannot track each
           // other.
           dedupe: ['svelte'],
-          alias: subscribe('subscribe.browser.ts'),
+          alias: subscribe('subscribe.browser.svelte.ts'),
         },
         test: {
           name: 'client',

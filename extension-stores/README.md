@@ -46,6 +46,8 @@ The output is typed from the instance it wraps, so what the config narrows — t
 
 Every store also carries a `get()` method for a subscription-free read of the current value.
 
+In the browser a store starts with the instance's current value and follows the instance from the next microtask on, so a change made synchronously right after the first subscription reaches the subscribers a microtask later; `get()` reads the instance directly and never lags. Under Svelte's `experimental.async`, a microtask can still run inside a component's effect, and a store whose first subscription starts in the gap an `await` of an unmounted component leaves can stop following the instance.
+
 | Store | Type | Description |
 |-------|------|-------------|
 | `t` | readable | Translation function for the active locale: `$t('key', ...params)`. A fresh function is emitted whenever the translations, the locale or the config change. |

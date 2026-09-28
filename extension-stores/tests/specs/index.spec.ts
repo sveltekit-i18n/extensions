@@ -1,12 +1,14 @@
 import { I18n } from '@sveltekit-i18n/base';
 import type { Config } from '@sveltekit-i18n/base';
 import { flushSync } from 'svelte';
+import { readable } from 'svelte/store';
 import type { Readable } from 'svelte/store';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import stores from '../../src';
 import type { Output } from '../../src';
-import { subscribeInEffect } from '../effects.svelte';
+import { fromInstance } from '../../src/subscribe.browser.svelte';
+import { countedState, inDestroyedEffect, subscribeInEffect } from '../effects.svelte';
 
 const CONFIG: Config.T = {
   initLocale: 'en',
@@ -22,6 +24,9 @@ const CONFIG: Config.T = {
     cs: { common: { hi: 'Ahoj!' } },
   },
 };
+
+// A subscription tracks the instance from the microtask after it started.
+const tracking = () => new Promise<void>((done) => { queueMicrotask(done); });
 
 const collect = <T>(store: Readable<T>) => {
   const values: T[] = [];
@@ -133,6 +138,78 @@ describe('stores extension', () => {
     second.unsubscribe();
   });
 
+  it('keeps emitting after the effect that first applied it is destroyed', async () => {
+    const instance = new I18n(CONFIG);
+    const output = inDestroyedEffect(() => stores(instance));
+    const { values, unsubscribe } = collect(output.locale);
+
+    await output.setLocale('cs');
+    flushSync();
+
+    expect(values).toEqual(['en', 'cs']);
+    unsubscribe();
+  });
+
+  it('keeps every store emitting after the effect that first applied it is destroyed', async () => {
+    const output = inDestroyedEffect(() => stores(new I18n({ ...CONFIG, translations: { ...CONFIG.translations, de: {}, sk: {} } })));
+    const t = collect(output.t);
+    const first = collect(output.locale);
+
+    await output.setLocale('cs');
+    flushSync();
+    t.unsubscribe();
+    first.unsubscribe();
+
+    const second = collect(output.locale);
+
+    await output.setLocale('de');
+    flushSync();
+    await output.setLocale('sk');
+    flushSync();
+
+    expect(second.values).toEqual(['cs', 'de', 'sk']);
+    second.unsubscribe();
+  });
+
+  it('hands a change made before a subscription tracks the instance on at the next microtask', async () => {
+    const output = stores(new I18n(CONFIG));
+    const { values, unsubscribe } = collect(output.translations);
+
+    output.addTranslations({ en: { common: { bye: 'Bye!' } } });
+    flushSync();
+
+    expect(values).toHaveLength(1);
+
+    await tracking();
+
+    expect(values).toHaveLength(2);
+    expect(values[1].en['common.bye']).toBe('Bye!');
+    unsubscribe();
+  });
+
+  it('stops tracking when its subscriber leaves on the change handed on at the next microtask', async () => {
+    const source = countedState(0);
+    const store = fromInstance(readable(0), source.get);
+    const values: number[] = [];
+    const unsubscribe = store.subscribe((value) => {
+      values.push(value);
+
+      if (value === 1) unsubscribe();
+    });
+
+    source.set(1);
+    await tracking();
+
+    expect(values).toEqual([0, 1]);
+
+    const reads = source.reads();
+
+    source.set(2);
+    flushSync();
+
+    expect(source.reads()).toBe(reads);
+  });
+
   it('setting the writable `locale` store triggers a locale switch', async () => {
     const output = stores(new I18n(CONFIG));
 
@@ -156,13 +233,14 @@ describe('stores extension', () => {
     expect(output.instance.locale).toBe('cs');
   });
 
-  it('hands out a fresh `t` wrapper when its reactive inputs change', () => {
+  it('hands out a fresh `t` wrapper when its reactive inputs change', async () => {
     const output = stores(new I18n(CONFIG));
     const { values, unsubscribe } = collect(output.t);
 
     expect(values).toHaveLength(1);
     expect(values[0]('common.bye')).toBe('common.bye');
 
+    await tracking();
     output.addTranslations({ en: { common: { bye: 'Bye!' } } });
     flushSync();
 
@@ -378,7 +456,7 @@ describe('stores extension', () => {
     const { hydrate } = client;
 
     hydrate(envelope);
-    flushSync();
+    await tracking();
 
     expect(locale.values.at(-1)).toBe('en');
     expect(client.t.get()('common.hi')).toBe('Hello!');
