@@ -10,6 +10,14 @@ Base v3 exposes one runes-based reactive instance. This extension replaces that 
 npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-stores
 ```
 
+With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), install the extension alone — the core comes with it:
+
+```sh
+npm i -D @sveltekit-i18n/extension-stores
+```
+
+On `sveltekit-i18n` 3.0, pin the extension's 3.0 line (`npm i -D @sveltekit-i18n/extension-stores@3.0`): this release needs a 3.1 core (see [Upgrading from 3.0](#upgrading-from-30)).
+
 ## Usage
 
 Add the extension to `config.extensions` — `new I18n(...)` then evaluates to the store-shaped output:
@@ -43,9 +51,9 @@ Every store also carries a `get()` method for a subscription-free read of the cu
 | `t` | readable | Translation function for the active locale: `$t('key', ...params)`. A fresh function is emitted whenever the translations, the locale or the config change. |
 | `l` | readable | Locale-explicit translation function: `$l('en', 'key', ...params)`. Emitted the same way as `t`. |
 | `locale` | **writable** | The active locale. Setting it (`locale.set('en')`, `$locale = 'en'`) triggers a fire-and-forget locale switch; the store emits once the switch completes. A falsy value is ignored, exactly as it is on the instance. A switch that a loader's SvelteKit `redirect()` or `error()` below 500 rejects is only logged: the store stays on the old locale and does not emit, so a `<select bind:value={$locale}>` keeps showing the refused option. For an awaitable switch that receives the rejection, use `setLocale`. |
-| `locales` | readable | All configured locales. |
-| `loading` | readable | `true` while a load that switches the locale or the route is in flight — `setLocale`, `setRoute`, `loadTranslations` or setting `locale`. `loadNamespace()` and `loadTranslations(…, { activate: false })` do not count; await what they return instead. |
-| `initialized` | readable | `true` once the first translations have been loaded. |
+| `locales` | readable | All known locales: the loaders' and those of loaded or added translations. |
+| `loading` | readable | `true` while a load that switches the locale or the route is in flight — `setLocale`, `setRoute`, `loadTranslations` or setting `locale`. A load of `loadNamespace()` or `loadTranslations(…, { activate: false })` does not count unless an activating call joins it; await what they return instead. |
+| `initialized` | readable | `true` once a locale and route are set and translations are present. |
 | `translations` | readable | The loaded translation tables. |
 | `rawTranslations` | readable | The loaded translation tables before preprocessing. |
 
@@ -55,7 +63,7 @@ Every store also carries a `get()` method for a subscription-free read of the cu
 
 ### Server-rendered apps
 
-With SvelteKit, [`@sveltekit-i18n/base/kit`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#sveltekit) does the whole hand-off. Put the extension in the config it wires, and `data.i18n`, `use()` and `get()` hand out the stores; the hook, the layouts and `use()` stay as its setup shows:
+With SvelteKit, [`@sveltekit-i18n/base/kit`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#sveltekit) does the whole hand-off. Put the extension in the config it wires, and `data.i18n`, `use()` and `get()` hand out the stores; the hook, the layouts and `use()` stay as its setup shows. With `sveltekit-i18n` 3.1 or newer, import `defineI18n` from `sveltekit-i18n/kit` instead:
 
 ```js
 // src/lib/i18n.js
@@ -86,7 +94,7 @@ The untouched `I18n` instance, as an escape hatch to the full runes-based API.
 
 ## Upgrading from 3.0
 
-- Requires `@sveltekit-i18n/base` 3.1 or newer. With `sveltekit-i18n`, that is a release built on base 3.1: on one built on 3.0, the instance has no `hydrate` or `loadNamespace` to pass through.
+- Requires `@sveltekit-i18n/base` 3.1 or newer. With `sveltekit-i18n`, that is `sveltekit-i18n` 3.1 or newer: on 3.0, the instance has no `hydrate` or `loadNamespace` to pass through.
 - `hydrate()` and `loadNamespace()` are passed through, and `invalidate()` takes base 3.1's `namespace` argument.
 - Setting the `locale` store no longer always switches: a switch a loader's `redirect()` or `error()` below 500 rejects leaves the store on the old locale. Use `setLocale` to receive the rejection.
 - On the server, a store no longer reports what the instance held when the extension ran, before anything had loaded: each subscription reads the instance when it starts.
