@@ -26,7 +26,9 @@ the [sveltekit-i18n](https://github.com/sveltekit-i18n/lib) ecosystem
 
 - **Monorepo without workspaces** — like `parsers`: no root `package.json`;
   each `extension-*/` directory is a fully standalone npm package with its own
-  `package.json`, lockfile, configs, tests, README, LICENSE, and CHANGELOG.
+  `package.json`, lockfile, configs, tests, README, and LICENSE. There is no
+  CHANGELOG file: release notes are the GitHub Releases `publish.yml` creates
+  per package tag (`extension-stores@<version>`).
 - The root holds only `README.md` (extension pipe overview + package index),
   this file, `CLAUDE.md`, `.gitignore`, and `.github/workflows/`.
 

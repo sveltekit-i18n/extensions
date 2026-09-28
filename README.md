@@ -42,16 +42,24 @@ See the [package README](https://github.com/sveltekit-i18n/extensions/tree/maste
 You don't need this repository to write an extension — any function works:
 
 ```ts
-import I18n from '@sveltekit-i18n/base';
+import I18n, { type Extension } from '@sveltekit-i18n/base';
 
-const withGreeting = <T extends { locale: unknown }>(i18n: T) => ({
-  ...i18n,
-  greet: () => `Hello from ${String(i18n.locale)}!`,
+interface WithGreeting extends Extension.Operator {
+  readonly output: this['input'] & { greet: () => string };
+}
+
+const withGreeting: Extension.Generic<WithGreeting> = (i18n: I18n) => Object.assign(i18n, {
+  greet: () => `Hello from ${i18n.locale}!`,
 });
 
+// Typed as the instance & { greet: () => string } — schema and locales intact:
 const i18n = new I18n({ ...config, extensions: [withGreeting] });
 i18n.greet();
 ```
+
+`Object.assign` augments the instance in place, so its members — `t`, `l`, `locale`, `loading` and the rest, getters on the class — keep working. A spread (`{ ...i18n, greet }`) copies none of them: they live on the prototype, not on the instance.
+
+`Extension.Operator` types the output by the surface the extension receives, so the `schema` and the locale union the config narrowed survive the pipe. An extension typed by a fixed return type contributes that type and erases the instance's type parameters; a generic signature (`<T>(i18n: T) => …`) erases the whole surface, since the pipe reads it with `T` at its constraint.
 
 Guidelines:
 
