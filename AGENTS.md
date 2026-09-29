@@ -10,10 +10,10 @@ preference. If your own memory conflicts with this file, follow this file.
 This repo follows the same working rules as
 [`base`'s AGENTS.md](https://github.com/sveltekit-i18n/base/blob/master/AGENTS.md)
 (sections 1-14: think before coding, simplicity first, surgical changes,
-verify and review cycle, commit on approval, fixup hygiene, branch & push
-discipline, PRs, docs track code, coding conventions, security posture,
-English-only artifacts, test rules, terse output, no emojis). What follows is
-only what differs here.
+verify and review cycle with release planning, commit on approval, fixup
+hygiene, branch & push discipline, PRs, docs track code, coding conventions,
+security posture, English-only artifacts, test rules, terse output, no
+emojis). What follows is only what differs here.
 
 ---
 
@@ -48,6 +48,11 @@ in `devDependencies` to build and test against. The range is
 line and every stable 3.x from 3.1.0, and no 3.0 core. The range stays once
 3.1.0 is stable: narrowing it would fail an app still on one of those
 prereleases. `npm install` inside a package is the whole setup.
+
+A release is planned with the rest of the family (base's §4, *Releases*):
+after `base`, before `sveltekit-i18n`. Each package's `README.md` is its npm
+page, so it describes the version being published, and each of its links
+resolves.
 
 ## Extension contract you must respect
 
