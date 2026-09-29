@@ -51,7 +51,7 @@ In the browser a store starts with the instance's current value and follows the 
 | Store | Type | Description |
 |-------|------|-------------|
 | `t` | readable | Translation function for the active locale: `$t('key', ...params)`. A fresh function is emitted whenever the translations, the locale or the config change. |
-| `l` | readable | Locale-explicit translation function: `$l('en', 'key', ...params)`. Emitted the same way as `t`. |
+| `l` | readable | Locale-explicit translation function: `$l('en', 'key', ...params)`. A fresh function is emitted whenever the translations or the config change; a locale switch alone emits none, since the locale is an argument. |
 | `locale` | **writable** | The active locale. Setting it (`locale.set('en')`, `$locale = 'en'`) triggers a fire-and-forget locale switch; the store emits once the switch completes. A falsy value is ignored, exactly as it is on the instance. A switch that a loader's SvelteKit `redirect()` or `error()` below 500 rejects is only logged: the store stays on the old locale and does not emit, so a `<select bind:value={$locale}>` keeps showing the refused option. For an awaitable switch that receives the rejection, use `setLocale`. |
 | `locales` | readable | All known locales: the loaders' and those of loaded or added translations. |
 | `loading` | readable | `true` while a load that switches the locale or the route is in flight — `setLocale`, `setRoute`, `loadTranslations` or setting `locale`. A load of `loadNamespace()` or `loadTranslations(…, { activate: false })` does not count unless an activating call joins it; await what they return instead. |
