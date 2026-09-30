@@ -41,20 +41,9 @@ export const inDestroyedEffect = <T>(run: () => T): T => {
   return result;
 };
 
-// A reactive value that counts how often it is read.
-export const countedState = <T>(initial: T) => {
-  let value = $state(initial);
-  let reads = 0;
+// A params object a component passes to `$t(...)` and changes in place.
+export const person = (name: string) => {
+  const params = $state({ name });
 
-  return {
-    get: () => {
-      reads += 1;
-
-      return value;
-    },
-    set: (next: T) => {
-      value = next;
-    },
-    reads: () => reads,
-  };
+  return params;
 };

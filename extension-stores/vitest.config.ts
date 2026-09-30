@@ -25,8 +25,11 @@ export default defineConfig({
       {
         plugins: [
           // Compiles base's `.svelte.ts` rune modules (shipped uncompiled in
-          // its dist) for the test runtime.
-          svelte(),
+          // its dist) for the test runtime, and `Await.svelte` as an app on
+          // `experimental.async` compiles it.
+          svelte({
+            dynamicCompileOptions: ({ filename }) => (filename.endsWith('/Await.svelte') ? { experimental: { async: true } } : undefined),
+          }),
           forceJsPluginPipeline,
         ],
         resolve: {
