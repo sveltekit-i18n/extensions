@@ -7,6 +7,7 @@ dist/
 .idea/
 .DS_Store
 *.log
+*.tgz
 
 # Claude Code: user- and session-local only. Shared settings, skills, agents
 # and commands under .claude/ stay tracked.

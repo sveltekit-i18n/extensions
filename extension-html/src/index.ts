@@ -13,7 +13,7 @@ type AnyI18n = I18n<any, any, any, any>;
  * Renders the markup a translation carries as elements and components:
  * `<i18n.T key="intro" params={{ name }} />`. The extension adds `T` to the
  * instance it receives and returns that instance, so it goes before any
- * extension that returns a surface of its own, such as `extension-stores`.
+ * extension whose output is no instance, such as `extension-stores`.
  */
 const html = (options: Options) => {
   if (typeof options !== 'object' || options === null || typeof (options as Partial<AnyI18n>).loadTranslations === 'function') {
@@ -26,7 +26,7 @@ const html = (options: Options) => {
     if (applied.has(i18n)) return i18n as WithT<I>;
 
     if (typeof i18n?.t !== 'function' || typeof i18n.l !== 'function') {
-      throw new TypeError('html() needs the instance itself: put it before any extension that replaces the instance, such as `stores`.');
+      throw new TypeError('html() needs the instance itself: put it before any extension whose output is no instance, such as `stores`.');
     }
 
     // A component is a function of the render's internals and its props. `T`

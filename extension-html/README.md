@@ -178,13 +178,13 @@ A report is made each time the message renders — on the server and again in th
 
 ## Other extensions
 
-An extension that replaces the instance — such as [`extension-stores`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores) — goes after this one, and `T` is then at `instance.T`:
+An extension whose output is no instance — such as [`extension-stores`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores) — goes after this one, and `T` is then at `instance.T`:
 
 ```ts
 export const { t, locale, instance: { T } } = new I18n({ ...config, extensions: [html({ onReport: null }), stores] });
 ```
 
-Put the other way round, `html` throws at construction, and its output type carries no `T`. `html` is a factory of the options: `extensions: [html]` and `html()` throw too.
+Put the other way round, `html` throws at construction, and its output type carries no `T`. [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) returns an output that is still an instance, so `html` may go after it and adds `T` beside the tree: `extensions: [typedAccess, html({ onReport: null })]`. `html` is a factory of the options: `extensions: [html]` and `html()` throw too.
 
 ## With SvelteKit
 

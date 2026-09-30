@@ -93,8 +93,8 @@ export type Props<I> = I extends I18n<infer P, any, infer S, infer L>
 export type WithT<I> = I & { T: Component<Props<I>> };
 
 /**
- * An input that is no instance — a pipe that put an extension replacing the
- * instance first — gets no `T`, so the mistake surfaces where `T` is used.
+ * An input that is no instance — a pipe that put an extension whose output is
+ * no instance first — gets no `T`, so the mistake surfaces where `T` is used.
  */
 export interface WithHtml extends Extension.Operator {
   readonly output: this['input'] extends AnyI18n ? WithT<this['input']> : this['input'];
