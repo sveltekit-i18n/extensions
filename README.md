@@ -37,6 +37,30 @@ export const { t, locale, loading, loadTranslations } = new I18n({
 
 See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores#readme) for the full output reference and v2 migration notes.
 
+### [@sveltekit-i18n/extension-html](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html)
+
+Adds a `T` component that renders the markup a translation carries as elements and Svelte components — from an allowlist, with URLs gated by scheme and the payload escaped, no `{@html}`.
+
+```sh
+npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-html
+```
+
+```ts
+import I18n from '@sveltekit-i18n/base';
+import html from '@sveltekit-i18n/extension-html';
+
+export const i18n = new I18n({
+  ...config,
+  extensions: [html({ onReport: null })],
+});
+```
+
+```svelte
+<i18n.T key="intro" params={{ name }} />
+```
+
+See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html#readme) for the component map, the allowlists and the parsers it works with.
+
 ## Creating Custom Extensions
 
 You don't need this repository to write an extension — any function works:

@@ -47,7 +47,8 @@ in `devDependencies` to build and test against. The range is
 `loadNamespace()`, which base 3.1 adds, so it takes the core's `3.1.0-next`
 line and every stable 3.x from 3.1.0, and no 3.0 core. The range stays once
 3.1.0 is stable: narrowing it would fail an app still on one of those
-prereleases. `npm install` inside a package is the whole setup.
+prereleases. `extension-html` uses nothing of 3.1 and takes the parsers'
+range, `^3.0.0 || ^3.1.0-next.0`. `npm install` inside a package is the whole setup.
 
 A release is planned with the rest of the family (base's §4, *Releases*):
 after `base`, before `sveltekit-i18n`. Each package's `README.md` is its npm
@@ -60,7 +61,8 @@ resolves.
   the `I18n` constructor's left-to-right pipe. It receives a configured
   instance (after the synchronous prefix of the config load).
 - An extension that replaces the instance must expose the original under an
-  `instance` key as an escape hatch.
+  `instance` key as an escape hatch. One that augments it (`extension-html`)
+  goes before those in a pipe, since a replacement copies a fixed surface.
 - Memoize per instance (`WeakMap`) so double application is harmless.
 - Extension packages must not break when applied directly
   (`extension(new I18n(config))`) — tests call them that way.

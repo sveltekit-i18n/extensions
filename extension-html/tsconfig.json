@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "sourceMap": false,
+    "strict": true,
+    // Declaration files of build tooling (vite, rolldown) target newer lib
+    // levels than this package; the subject of this gate is our code.
+    "skipLibCheck": true,
+    "target": "es2022",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "types": ["node", "svelte"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "./src",
+    "./tests",
+    "./*.js",
+    "./*.ts"
+  ]
+}
