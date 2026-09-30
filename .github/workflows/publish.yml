@@ -3,6 +3,13 @@ name: NPM Publish
 on:
   workflow_dispatch:
     inputs:
+        package:
+          description: 'Package'
+          required: true
+          type: choice
+          options:
+            - extension-stores
+            - extension-html
         version:
           description: 'Version'
           required: true
@@ -26,7 +33,7 @@ jobs:
       id-token: write
     defaults:
       run:
-        working-directory: extension-stores
+        working-directory: ${{ inputs.package }}
     steps:
       # The release commit lands on a protected branch; the app is on the
       # bypass allowlist, GITHUB_TOKEN is not.
@@ -74,8 +81,8 @@ jobs:
             DIST_TAG=latest
           fi
           VERSION="$(node -p 'require("./package.json").version')"
-          TAG="extension-stores@$VERSION"
-          git commit -a -m "chore(extension-stores): release @sveltekit-i18n/$TAG"
+          TAG="${{ inputs.package }}@$VERSION"
+          git commit -a -m "chore(${{ inputs.package }}): release @sveltekit-i18n/$TAG"
           git tag "$TAG"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
@@ -106,11 +113,11 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           TAG: ${{ steps.bump.outputs.tag }}
-          PACKAGE: extension-stores
+          PACKAGE: ${{ inputs.package }}
           VERSION: ${{ steps.bump.outputs.version }}
         run: |
-          # Notes span this package's own tags; once a second extension ships,
-          # the tag preceding this release may belong to it. A release starts
+          # Notes span this package's own tags: the tag preceding this release
+          # may belong to another extension. A release starts
           # at the previous release, skipping the prereleases that led to it.
           PREVIOUS="$(git tag --list "$PACKAGE@*" --sort=-creatordate \
             | awk -v tag="$TAG" '!found && $0 != tag && ($0 !~ /@[^-]*-/ || tag ~ /@[^-]*-/) { print; found = 1 }')"
