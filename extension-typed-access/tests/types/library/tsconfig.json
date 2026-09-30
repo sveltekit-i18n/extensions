@@ -1,0 +1,17 @@
+{
+  // The library's consumer: reads the emitted declarations only.
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "types": [],
+    "paths": {
+      "@sveltekit-i18n/extension-typed-access": ["../../../dist/index.d.ts"]
+    }
+  },
+  "files": ["./app.ts"]
+}

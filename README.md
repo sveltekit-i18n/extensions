@@ -61,6 +61,26 @@ export const i18n = new I18n({
 
 See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html#readme) for the component map, the allowlists and the parsers it works with.
 
+### [@sveltekit-i18n/extension-typed-access](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access)
+
+Adds typed member access, `t.cart.summary.itemCount({ count: 3 })`, beside `t('cart.summary.itemCount', { count: 3 })`: the tree is typed from the app's schema and every call goes through the instance's own `t`.
+
+```sh
+npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-typed-access
+```
+
+```ts
+import I18n from '@sveltekit-i18n/base';
+import typedAccess from '@sveltekit-i18n/extension-typed-access';
+
+export const i18n = new I18n({
+  ...config,
+  extensions: [typedAccess],
+});
+```
+
+It composes with `extension-stores` placed after it (`extensions: [typedAccess, stores]`). See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access#readme) for the reserved names, the pipe order and the output reference.
+
 ## Creating Custom Extensions
 
 You don't need this repository to write an extension — any function works:

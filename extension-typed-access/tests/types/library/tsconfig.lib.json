@@ -1,0 +1,18 @@
+{
+  // The library: emits its declarations into ./dist against the shipped ones.
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "strict": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "skipLibCheck": false,
+    "types": [],
+    "paths": {
+      "@sveltekit-i18n/extension-typed-access": ["../../../dist/index.d.ts"]
+    }
+  },
+  "files": ["./lib.ts"]
+}
