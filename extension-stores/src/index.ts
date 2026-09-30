@@ -2,7 +2,7 @@ import { toStore } from 'svelte/store';
 import type { Readable, Writable } from 'svelte/store';
 import type { Extension, I18n } from '@sveltekit-i18n/base';
 
-import { fromInstance } from '#subscribe';
+import { tracker } from '#subscribe';
 
 type AnyI18n = I18n<any, any, any, any>;
 
@@ -43,16 +43,19 @@ export interface WithStores extends Extension.Operator {
 
 const cache = new WeakMap<object, Output>();
 
-const withGet = <S extends Readable<V>, V>(store: S, get: () => V): WithGet<S, V> => Object.assign(fromInstance(store, get), { get });
-
 const stores = <I extends AnyI18n>(i18n: I): Output<I> => {
   const memoized = cache.get(i18n);
 
   if (memoized) return memoized as Output<I>;
 
+  const fromInstance = tracker();
+  const withGet = <S extends Readable<V>, V>(store: S, get: () => V): WithGet<S, V> => Object.assign(fromInstance(store, get), { get });
+  // A store whose value derives from another's emits after it within a flush.
   const output: Output = {
-    t: withGet(toStore(() => i18n.t), () => i18n.t),
-    l: withGet(toStore(() => i18n.l), () => i18n.l),
+    translations: withGet(toStore(() => i18n.translations), () => i18n.translations),
+    rawTranslations: withGet(toStore(() => i18n.rawTranslations), () => i18n.rawTranslations),
+    locales: withGet(toStore(() => i18n.locales), () => i18n.locales),
+    loading: withGet(toStore(() => i18n.loading), () => i18n.loading),
     locale: withGet(
       toStore(() => i18n.locale, (locale) => {
         // Assignment is the instance's fire-and-forget `setLocale()`.
@@ -60,11 +63,9 @@ const stores = <I extends AnyI18n>(i18n: I): Output<I> => {
       }),
       () => i18n.locale,
     ),
-    locales: withGet(toStore(() => i18n.locales), () => i18n.locales),
-    loading: withGet(toStore(() => i18n.loading), () => i18n.loading),
     initialized: withGet(toStore(() => i18n.initialized), () => i18n.initialized),
-    translations: withGet(toStore(() => i18n.translations), () => i18n.translations),
-    rawTranslations: withGet(toStore(() => i18n.rawTranslations), () => i18n.rawTranslations),
+    t: withGet(toStore(() => i18n.t), () => i18n.t),
+    l: withGet(toStore(() => i18n.l), () => i18n.l),
     loadTranslations: i18n.loadTranslations,
     loadNamespace: i18n.loadNamespace,
     setLocale: i18n.setLocale,

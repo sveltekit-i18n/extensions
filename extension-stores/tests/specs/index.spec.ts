@@ -1,14 +1,13 @@
 import { I18n } from '@sveltekit-i18n/base';
 import type { Config } from '@sveltekit-i18n/base';
 import { flushSync } from 'svelte';
-import { readable } from 'svelte/store';
+import { derived } from 'svelte/store';
 import type { Readable } from 'svelte/store';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import stores from '../../src';
 import type { Output } from '../../src';
-import { fromInstance } from '../../src/subscribe.browser.svelte';
-import { countedState, inDestroyedEffect, subscribeInEffect } from '../effects.svelte';
+import { inDestroyedEffect, subscribeInEffect } from '../effects.svelte';
 
 const CONFIG: Config.T = {
   initLocale: 'en',
@@ -25,7 +24,7 @@ const CONFIG: Config.T = {
   },
 };
 
-// A subscription tracks the instance from the microtask after it started.
+// The stores track the instance from the microtask after the extension ran.
 const tracking = () => new Promise<void>((done) => { queueMicrotask(done); });
 
 const collect = <T>(store: Readable<T>) => {
@@ -171,7 +170,7 @@ describe('stores extension', () => {
     second.unsubscribe();
   });
 
-  it('hands a change made before a subscription tracks the instance on at the next microtask', async () => {
+  it('hands a change made before the stores track the instance on at the microtask after the extension ran', async () => {
     const output = stores(new I18n(CONFIG));
     const { values, unsubscribe } = collect(output.translations);
 
@@ -187,27 +186,77 @@ describe('stores extension', () => {
     unsubscribe();
   });
 
-  it('stops tracking when its subscriber leaves on the change handed on at the next microtask', async () => {
-    const source = countedState(0);
-    const store = fromInstance(readable(0), source.get);
-    const values: number[] = [];
-    const unsubscribe = store.subscribe((value) => {
-      values.push(value);
+  it('emits a change to a subscription that starts once the stores track the instance, at the flush', async () => {
+    const output = stores(new I18n(CONFIG));
 
-      if (value === 1) unsubscribe();
-    });
-
-    source.set(1);
     await tracking();
 
-    expect(values).toEqual([0, 1]);
+    const { values, unsubscribe } = collect(output.translations);
 
-    const reads = source.reads();
-
-    source.set(2);
+    output.addTranslations({ en: { common: { bye: 'Bye!' } } });
     flushSync();
 
-    expect(source.reads()).toBe(reads);
+    expect(values).toHaveLength(2);
+    expect(values[1].en['common.bye']).toBe('Bye!');
+    unsubscribe();
+  });
+
+  it('starts a subscription with a change made since the last flush', async () => {
+    const output = stores(new I18n(CONFIG));
+
+    await tracking();
+    output.addTranslations({ en: { common: { bye: 'Bye!' } } });
+
+    const { values, unsubscribe } = collect(output.translations);
+
+    expect(values[0].en['common.bye']).toBe('Bye!');
+    unsubscribe();
+  });
+
+  it('never pairs a store with an older value of a store it derives from', async () => {
+    const output = stores(new I18n({
+      ...CONFIG,
+      loaders: [{ locale: 'de', key: 'common', loader: async () => ({ hi: 'Hallo!' }) }],
+    }));
+
+    await tracking();
+
+    const pairs = derived([output.t, output.locale], ([t, locale]) => `${locale}:${t('common.hi')}`);
+    const tables = derived([output.translations, output.locale], ([translations, locale]) => `${locale}:${translations[locale!]?.['common.hi']}`);
+    const seen = [collect(pairs), collect(tables)];
+
+    await output.setLocale('cs');
+    flushSync();
+    await output.setLocale('de');
+    flushSync();
+
+    for (const { values, unsubscribe } of seen) {
+      expect(values).toEqual(['en:Hello!', 'cs:Ahoj!', 'de:Hallo!']);
+      unsubscribe();
+    }
+  });
+
+  it('never reports `initialized` ahead of the locale it derives from', async () => {
+    const output = stores(new I18n({
+      parser: CONFIG.parser,
+      log: CONFIG.log,
+      loaders: [{ locale: 'en', key: 'common', loader: async () => ({ hi: 'Hello!' }) }],
+    }));
+
+    await tracking();
+
+    const seen = [
+      collect(derived([output.locale, output.initialized], ([locale, initialized]) => `${locale}|${initialized}`)),
+      collect(derived([output.initialized, output.locale], ([initialized, locale]) => `${locale}|${initialized}`)),
+    ];
+
+    await output.loadTranslations('en', '/');
+    flushSync();
+
+    for (const { values, unsubscribe } of seen) {
+      expect(values).toEqual(['undefined|false', 'en|false', 'en|true']);
+      unsubscribe();
+    }
   });
 
   it('setting the writable `locale` store triggers a locale switch', async () => {

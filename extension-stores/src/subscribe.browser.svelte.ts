@@ -1,42 +1,44 @@
 import { untrack } from 'svelte';
-import { readable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { Readable } from 'svelte/store';
 
-// A subscription starts with the instance's current value, and tracks it from
-// an effect root of its own. The root is made in a microtask, where no effect
-// is active: one made under the subscriber's effect, as `toStore` makes it, is
-// only detached when that effect re-runs or ends, and stops being flushed.
-export const fromInstance = <S extends Readable<V>, V>(store: S, get: () => V): S => ({
-  ...store,
-  subscribe: readable<V>(undefined, (set) => {
-    const current = untrack(get);
-    let stop: (() => void) | undefined;
-    let stopped = false;
-    let tracked = false;
+// One effect root per instance, made in a microtask once no effect is active: a
+// root made under an effect (a component's, or one an `await` restored under
+// `experimental.async`) is detached when that effect ends and can stop being
+// flushed. Made before the app mounts, it re-runs ahead of the templates that
+// read the stores, and runs its effects in the order the stores are made.
+export const tracker = () => {
+  const trackers: (() => void)[] = [];
+  const track = () => {
+    if ($effect.tracking()) {
+      queueMicrotask(track);
 
-    set(current);
+      return;
+    }
 
-    queueMicrotask(() => {
-      if (stopped) return;
+    $effect.root(() => {
+      for (const run of trackers) $effect.pre(run);
+    });
+  };
 
-      // The first run can hand a change on, and its subscriber can leave there.
-      const destroy = $effect.root(() => {
-        $effect.pre(() => {
-          const value = get();
+  queueMicrotask(track);
 
-          if (tracked || !Object.is(value, current)) set(value);
+  return <S extends Readable<V>, V>(store: S, get: () => V): S => {
+    let value = untrack(get);
+    const emit = (next: V) => {
+      if (Object.is(next, value)) return;
 
-          tracked = true;
-        });
-      });
-
-      if (stopped) destroy();
-      else stop = destroy;
+      value = next;
+      untrack(() => { set(next); });
+    };
+    const { subscribe, set } = writable<V>(value, () => {
+      emit(untrack(get));
     });
 
-    return () => {
-      stopped = true;
-      stop?.();
-    };
-  }).subscribe,
-});
+    trackers.push(() => {
+      emit(get());
+    });
+
+    return { ...store, subscribe };
+  };
+};

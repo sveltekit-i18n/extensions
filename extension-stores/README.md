@@ -46,7 +46,7 @@ The output is typed from the instance it wraps, so what the config narrows — t
 
 Every store also carries a `get()` method for a subscription-free read of the current value.
 
-In the browser a store starts with the instance's current value and follows the instance from the next microtask on, so a change made synchronously right after the first subscription reaches the subscribers a microtask later; `get()` reads the instance directly and never lags. Under Svelte's `experimental.async`, a microtask can still run inside a component's effect, and a store whose first subscription starts in the gap an `await` of an unmounted component leaves can stop following the instance.
+In the browser the stores follow the instance from the microtask after the extension ran, for as long as the instance lives, whether or not anything subscribes. A subscription starts with the instance's current value, and a change made before that microtask reaches the subscribers at it. `get()` reads the instance directly and never lags. Within one update, a store emits after the stores its value derives from: the tables, then `locale`, then `initialized`, `t` and `l`. A component mounted after that microtask renders a `$t(...)` once per change, unless something schedules the app's update ahead of the change; then it renders it twice. That is a write earlier in the same update to other state the app renders, a change made inside Svelte's own update (as a `$effect.pre` switching the locale does), or an instance built in the same synchronous task that mounts the app.
 
 | Store | Type | Description |
 |-------|------|-------------|
