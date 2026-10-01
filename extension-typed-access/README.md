@@ -105,7 +105,15 @@ A library that exports an instance built with the extension keeps the tree in it
 
 ## Cost
 
-A member call builds one proxy per segment on top of the string form's lookup: measured on Node 22, about 0.5 µs more for a three-segment key. The checker builds the tree once, over the whole key set, as soon as a module reads any member of the output — `t` in either form, but also `locale` or `setLocale` — and a call through the tree then reads its payload off its own key rather than the whole schema. On the same machine, with a schema of 10,000 keys, a single call checked in 0.3 s on an instance without the extension, and in 1.0 s with it over flat keys and 1.5 s over deeply nested ones. With 200 calls, the string form without the extension took 3.6 s and the tree 1.1 s and 1.7 s. What key patterns add to the tree's cost depends on the schema: two beside the nested keys took the string form to 8.1 s and the tree to 1.9 s, while two open namespaces over six-segment keys took the tree to 11 s against the string form's 6.4 s.
+A member call builds one proxy per segment on top of the string form's lookup: measured on Node 22, about 0.5 µs more for a three-segment key.
+
+The checker builds the tree as soon as a module reads any member of the output — `t` in either form, but also `locale` or `setLocale` — a level at a time: the root once, over the whole key set, and a namespace the first time a member under it is read. A level gathers the keys under each of its segments one key at a time, so it costs, for each segment, the square of the number of keys under it: spread over many namespaces, a schema costs about what its keys do, while one namespace holding them all costs their square. A call through the tree then reads its payload off its own key rather than the whole schema, so further calls add little.
+
+Measured with TypeScript 5.9 on base 3.2.0, with a schema of 10,000 keys, one call through the tree checked in 1.1 s over flat keys, 1.5 s over 500 namespaces of 20 keys, 3.1 s over six-segment keys under five top-level segments and 8.4 s over a single namespace; 200 calls took 1.1, 1.7, 3.7 and 9.0 s. A single namespace of 1,000, 2,000 and 5,000 keys took 0.4, 0.7 and 2.2 s, against 0.3, 0.4 and 0.6 s in namespaces of 20. Two key patterns beside the six-segment keys, or over two of their top-level segments, took the tree to 9.4–11 s.
+
+The string form without the extension depends on the core. On base 3.2.0 a call reads the whole schema: one call took 0.3 s and 200 calls 3.7–4.0 s, 5.3 s and 37 s with the two patterns, and 1,000 calls into 20,000 keys in namespaces of 20 took 37 s, where the tree took 3.5 s. On a core that carries the fix for [lib#298](https://github.com/sveltekit-i18n/lib/issues/298), a call reads only its own key, and 200 calls took 0.4–0.6 s on every schema above — below the tree, which that core changes little.
+
+The tree's cost is in its largest group of keys under one segment, not in the size of the schema: keep namespaces to hundreds of keys, and leave the extension off an instance whose schema holds thousands under one segment, since its string form builds the tree too.
 
 ## Documentation
 
