@@ -62,6 +62,12 @@ after `base`, before `sveltekit-i18n`. Each package's `README.md` is its npm
 page, so it describes the version being published, and each of its links
 resolves.
 
+`publish.yml` releases one package per run, by trusted publishing, which npm
+configures only for a package that exists: a new package's first version is
+published by hand (`npm publish --tag next` from its directory), its trusted
+publisher is then set to `publish.yml`, and every later release runs the
+workflow.
+
 ## Extension contract you must respect
 
 - An extension is `(input) => output`, run **once, at construction time**, by

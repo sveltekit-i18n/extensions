@@ -10,6 +10,7 @@ on:
           options:
             - extension-stores
             - extension-html
+            - extension-typed-access
         version:
           description: 'Version'
           required: true
