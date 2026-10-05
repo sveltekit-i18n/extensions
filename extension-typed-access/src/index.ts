@@ -54,8 +54,8 @@ type Masked<Children extends PropertyKey, Node = never> = {
 
 /**
  * TypeScript computes `keyof` of an object type anew, over every key, each
- * time it reads it, so a call never reads the schema's: `Root` computes it
- * once for the tree (`Keys`), and a leaf reads its payload off `Pick<S, K>`.
+ * time it reads it, so a call never reads the schema's: each root computes
+ * it once for the tree (`Keys`), and a leaf reads its payload off `Pick<S, K>`.
  */
 type Leaf<S, P extends Parser.Params, O, K extends keyof S & string> =
   (...params: Schema.Params<Pick<S, K>, K, P>) => Translations.Translated<O>;
@@ -95,14 +95,56 @@ type Node<S, P extends Parser.Params, O, Path extends string, Lits extends strin
  * The root reserves no `prototype` (the runtime answers a node there), so the
  * `Function` member TypeScript reads under it is masked like the ones below.
  */
-type Prototype<Lits extends string> = 'prototype' extends keyof Heads<Lits, Reserved> ? unknown : { readonly prototype: never };
+type Prototype<Segments extends PropertyKey> = 'prototype' extends Segments ? unknown : { readonly prototype: never };
 
 type Root<S, P extends Parser.Params, O, Lits extends string, Pats extends string, Keys extends keyof S = keyof S> =
-  Level<S, P, O, Heads<Lits, Reserved>, Pats, '', Keys> & Prototype<Lits>;
+  Level<S, P, O, Heads<Lits, Reserved>, Pats, '', Keys> & Prototype<keyof Heads<Lits, Reserved>>;
 
-type Build<S, P extends Parser.Params, O> = IsAny<S> extends true ? unknown
+/**
+ * The levels `@sveltekit-i18n/typegen` registers, where they were built from
+ * exactly the schema's literal keys and patterns: a key declared beside the
+ * generated ones, or a schema of other keys, falls back to grouping the keys
+ * here.
+ */
+type Generated<S> = SvelteKitI18n.Register extends { tree: { keys: infer K; patterns: infer Q; next: infer N } }
+  ? Built<S, K, Q> extends true ? N : never
+  : never;
+
+/**
+ * Whether a schema's keys are the literals `K` and the patterns `Q`. Without
+ * patterns `keyof S` is its literals; a pattern absorbs the literals it
+ * matches, so only then are they read off the schema member by member.
+ * Literals compare by assignability both ways, exact for them and fast on a
+ * large key set, where identity is not.
+ */
+type Built<S, K, Q> = [Q] extends [never] ? SameKeys<keyof S, K>
+  : SameKeys<Literals<S>, K> extends true ? Same<Patterns<S>, Q> : false;
+
+type SameKeys<A, B> = [A] extends [B] ? [B] extends [A] ? true : false : false;
+
+/** A generated level: each segment of `Next` but an omitted one. */
+type GeneratedLevel<S, P extends Parser.Params, O, Next, Omitted extends PropertyKey, B, Keys extends keyof S> = {
+  readonly [H in Exclude<keyof Next, Omitted>]: GeneratedNode<S, P, O, Next[H], B, Keys>
+};
+
+/**
+ * A generated node: a leaf where it names a key, open where it or a node above
+ * it is an open namespace (`B`), and a level over the segments below it.
+ */
+type GeneratedNode<S, P extends Parser.Params, O, N, Up, Keys extends keyof S, B = N extends { open: true } ? Open<O> : Up> =
+  (N extends { key: infer K extends Keys & string } ? Leaf<S, P, O, K> : unknown)
+  & ([B] extends [never] ? unknown : Opened<O>)
+  & (N extends { next: infer Next }
+    ? GeneratedLevel<S, P, O, Next, 'then', B, Keys> & Masked<Exclude<keyof Next, 'then'>, B>
+    : Masked<never, B>);
+
+type GeneratedRoot<S, P extends Parser.Params, O, Next, Keys extends keyof S = keyof S> =
+  GeneratedLevel<S, P, O, Next, Reserved, never, Keys> & Prototype<Exclude<keyof Next, Reserved>>;
+
+type Build<S, P extends Parser.Params, O, Next = Generated<S>> = IsAny<S> extends true ? unknown
   : [S] extends [never] ? unknown
-    : Root<S, P, O, Literals<S> | OpenPrefix<Patterns<S>>, `${OpenPrefix<Patterns<S>>}.${string}`>;
+    : [Next] extends [never] ? Root<S, P, O, Literals<S> | OpenPrefix<Patterns<S>>, `${OpenPrefix<Patterns<S>>}.${string}`>
+      : GeneratedRoot<S, P, O, Next>;
 
 /**
  * The member tree over an instance's `schema`; nothing without a closed one.

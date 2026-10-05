@@ -1,0 +1,17 @@
+{
+  // A program of its own: the registration types every schema-less instance
+  // of the program it is part of. It compiles the shipped declarations.
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "types": [],
+    "paths": {
+      "@sveltekit-i18n/extension-typed-access": ["../../../dist/index.d.ts"]
+    }
+  },
+  "files": ["../tree/schema.d.ts", "./keys.d.ts", "./app.ts"]
+}
