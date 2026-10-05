@@ -114,6 +114,7 @@ The store shape matches sveltekit-i18n v2 with these differences:
 - 🌐 [sveltekit-i18n.github.io](https://sveltekit-i18n.github.io) – The documentation site, with a live playground
 - 📖 [@sveltekit-i18n/base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) – The core, and the `extensions` reference
 - 📚 [Documentation Index](https://github.com/sveltekit-i18n/lib/tree/master/docs/INDEX.md) – Guides, tutorials and best practices
+- 💡 [Example](https://github.com/sveltekit-i18n/lib/tree/master/examples/stores) – A SvelteKit app on the store surface
 
 ## Issues
 
