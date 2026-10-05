@@ -27,6 +27,22 @@ it('types the tree by the schema registered in SvelteKitI18n.Register', async ()
   expect(await compile('tests/types/registry/tsconfig.json')).toBe('');
 }, 60_000);
 
+it('types the tree by the levels typegen registers, as it groups the keys', async () => {
+  expect(await compile('tests/types/tree/tsconfig.json')).toBe('');
+}, 60_000);
+
+it('groups the keys where the app declares one beside the generated ones', async () => {
+  expect(await compile('tests/types/merged/tsconfig.json')).toBe('');
+}, 60_000);
+
+it('groups the keys where the app declares one under a namespace typegen left open', async () => {
+  expect(await compile('tests/types/absorbed/tsconfig.json')).toBe('');
+}, 60_000);
+
+it('groups the keys where the patterns are not the generated ones', async () => {
+  expect(await compile('tests/types/patterned/tsconfig.json')).toBe('');
+}, 60_000);
+
 it('hands back the outputs a library exports through its emitted declarations', async () => {
   expect(await compile('tests/types/library/tsconfig.lib.json')).toBe('');
   expect(await compile('tests/types/library/tsconfig.json')).toBe('');

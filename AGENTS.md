@@ -63,6 +63,20 @@ stores on `master`: `npm ci && npm run build && npm pack` in `extension-stores`,
 then `npm i --no-save ../extension-stores/<tarball>` and `npm test` in
 `extension-typed-access`.
 
+`extension-typed-access` reads the levels `@sveltekit-i18n/typegen` registers
+(`SvelteKitI18n.Register['tree']`: the literal `keys` and the `patterns` they
+were built from, apart, and `next`, the root of
+`SvelteKitI18n.Typegen.K<hash>.Level*` interfaces of `{ key?, open?, next? }`
+nodes), and groups the keys itself whenever they are absent or either set
+differs from the instance's schema's. The key sets compare by assignability
+both ways, and the literals are read off the schema member by member only
+where the tree has patterns, since `keyof` drops a literal a pattern matches:
+an identity check of a large key set beside a pattern is quadratic, and no
+counter of `cost.spec.ts` sees that, so measure the check time of a change to
+the guard. Its `tests/types/tree/schema.d.ts` is typegen's output, pasted: when typegen's format changes, regenerate it with typegen's
+`emit`, and before a release of either package, compile that program against
+an artifact typegen's `master` emits.
+
 A release is planned with the rest of the family (base's §4, *Releases*):
 after `base`, before `sveltekit-i18n`. Each package's `README.md` is its npm
 page, so it describes the version being published, and each of its links
