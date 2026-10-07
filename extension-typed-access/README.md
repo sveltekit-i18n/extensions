@@ -10,7 +10,7 @@ The member form completes each segment as you type, takes you to the key's paylo
 npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-typed-access
 ```
 
-With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), install the extension alone — the core comes with it:
+With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), install the extension alone — the core comes with it — and import `I18n` from `sveltekit-i18n` where a snippet here imports it from `@sveltekit-i18n/base`, so the instance gets its parser:
 
 ```sh
 npm i -D @sveltekit-i18n/extension-typed-access
@@ -69,7 +69,7 @@ A new object, not the instance: the instance's `t` is a `$derived` field and can
 |--------|------|-------------|
 | `t` | getter | The instance's `t`, callable as before and carrying the tree. A new function whenever the instance's `t` changes, as on the instance. Assigning it throws a `TypeError`. |
 | `locale`, `l`, `locales`, `loading`, `initialized`, `translations`, `rawTranslations` | accessors | Read from the instance whenever they are read, and assigned to it where the instance takes the assignment; where it does not, assigning throws a `TypeError`, as it does there: `locale` always takes one, `translations` and `rawTranslations` never do, and whether `l`, `locales`, `loading` and `initialized` do is up to the Svelte that compiles the core (their `$derived` fields). Setting `locale` is the instance's fire-and-forget locale switch. |
-| `loadTranslations`, `preload`, `loadNamespace`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot`, `hydrate`, `destroy` | methods | Passed through from the instance, pre-bound — safe to destructure. See the [base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for what each does. [`preload()`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#preloadlocale-route) comes with base 3.3 — not with `sveltekit-i18n` 3.3.0, which pins base 3.2.0: on an earlier core the output has no `preload`, and the types leave it out. |
+| `loadTranslations`, `preload`, `loadNamespace`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot`, `hydrate`, `destroy` | methods | Passed through from the instance, pre-bound — safe to destructure. See the [base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for what each does. [`preload()`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#preloadlocale-route) comes with base 3.3, which `sveltekit-i18n` carries from 3.4.0: on an earlier core the output has no `preload`, and the types leave it out. |
 | `instance` | value | The untouched `I18n` instance, as an escape hatch. Its `t` has no tree. |
 | `'~typedAccess'` | type only | Never present at runtime: it counts the outputs of this extension down to the instance, this one included, which lets the types tell an output from another extension's surface over it. Neither read it nor test for it with `in`. |
 
