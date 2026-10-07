@@ -29,6 +29,8 @@ jobs:
   publish-npm:
     needs: tests
     runs-on: ubuntu-latest
+    # The benchmark of the release runs in here.
+    timeout-minutes: 60
     permissions:
       contents: read
       id-token: write
@@ -87,6 +89,10 @@ jobs:
           fi
           VERSION="$(node -p 'require("./package.json").version')"
           TAG="$PACKAGE@$VERSION"
+          # The release commit carries the benchmark of the version it
+          # releases; `commit -a` takes no file it does not track yet.
+          npm run bench -- --write
+          git add BENCH.md
           git commit -a -m "chore($PACKAGE): release @sveltekit-i18n/$TAG"
           git tag "$TAG"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
