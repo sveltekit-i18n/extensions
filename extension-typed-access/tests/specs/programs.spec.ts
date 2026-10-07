@@ -47,3 +47,7 @@ it('hands back the outputs a library exports through its emitted declarations', 
   expect(await compile('tests/types/library/tsconfig.lib.json')).toBe('');
   expect(await compile('tests/types/library/tsconfig.json')).toBe('');
 }, 120_000);
+
+it('leaves `preload` out on a core without it', async () => {
+  expect(await compile('tests/types/earlier/tsconfig.json')).toBe('');
+}, 60_000);

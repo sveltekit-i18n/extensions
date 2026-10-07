@@ -1,0 +1,20 @@
+{
+  // A program of its own: it compiles the shipped declarations against the
+  // core `sveltekit-i18n` 3.3.0 pins, which has no `preload()`.
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "types": [],
+    "paths": {
+      // A file, not the package directory: a directory mapping does not
+      // reach the core's `exports`.
+      "@sveltekit-i18n/base": ["../../../node_modules/@sveltekit-i18n/base-3.2/dist/index.d.ts"],
+      "@sveltekit-i18n/extension-typed-access": ["../../../dist/index.d.ts"]
+    }
+  },
+  "files": ["./app.ts"]
+}

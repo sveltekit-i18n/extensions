@@ -283,6 +283,7 @@ const typedAccess = <I extends Spelled>(input: I): Output<I> => {
     get translations() { return i18n.translations; },
     get rawTranslations() { return i18n.rawTranslations; },
     loadTranslations: i18n.loadTranslations,
+    preload: i18n.preload,
     loadNamespace: i18n.loadNamespace,
     setLocale: i18n.setLocale,
     setRoute: i18n.setRoute,
