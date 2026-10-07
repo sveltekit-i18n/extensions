@@ -406,6 +406,7 @@ it('composes with extension-stores after it, and only after it', () => () => {
   both.t.get().common.nope();
   both.instance.instance.t('common.bye');
   expectTypeOf(both.locale.get()).toEqualTypeOf<'en' | 'cs' | (string & {}) | undefined>();
+  expectTypeOf(both.preload).toBeFunction();
 
   const wrong = new I18n({ ...config, extensions: [stores, typedAccess] });
 
