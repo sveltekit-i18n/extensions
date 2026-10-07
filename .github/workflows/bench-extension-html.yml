@@ -1,0 +1,28 @@
+name: HTML extension bench
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - extension-html/src/**
+      - extension-html/bench/**
+      - extension-html/package.json
+      - extension-html/package-lock.json
+      - extension-html/tsconfig.json
+      - bench/**
+      - .github/workflows/bench-extension-html.yml
+      - .github/workflows/bench.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: bench-${{ github.event.pull_request.number }}-extension-html
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    uses: ./.github/workflows/bench.yml
+    with:
+      package: extension-html

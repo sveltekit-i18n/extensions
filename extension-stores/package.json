@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "pretest": "npm run build && npm run typecheck",
     "test": "vitest run",
+    "bench": "node ../bench/run.mjs",
     "build": "svelte-package -i src -o dist",
     "prepublishOnly": "npm run build",
     "lint": "eslint --fix ."
