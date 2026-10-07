@@ -8,7 +8,7 @@ Renders the markup a translation carries — `Read <a href="/docs">the docs</a>`
 npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-html
 ```
 
-With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), install the extension alone — the core comes with it:
+With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), install the extension alone — the core comes with it — and import `I18n` from `sveltekit-i18n` where a snippet here imports it from `@sveltekit-i18n/base`, so the instance gets its parser:
 
 ```sh
 npm i -D @sveltekit-i18n/extension-html
@@ -145,6 +145,8 @@ What the parser makes of an object is its own text: a parser that serialises an 
 The parser runs first and `<T>` reads what it returns, so the parser has to pass markup through.
 
 - [`parser-curly`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-curly), [`parser-mf2`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-mf2) and [`parser-i18next`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-i18next) do. With i18next, keep its default `escapeValue: false`: the extension escapes the payload itself, and an escaped one would render its entities as text. Its unescape marker (`{{- name}}`) creates no markup in `<T>` either, since the payload is escaped before the parser sees it.
+  - With curly, a `;` inside an option value still ends the option, an entity's included: write `&amp\;` there, `&amp\\;` in JSON ([escaping](https://github.com/sveltekit-i18n/parsers/tree/master/parser-curly#escaping)).
+  - With MF2, write the tags as text: its own markup (`{#link}`) renders no element. The marks MF2 [isolates](https://github.com/sveltekit-i18n/parsers/tree/master/parser-mf2#bidi-isolation) a placeholder with are removed from every attribute but `title` ([Attributes](#attributes)); an attribute the app fills with `t()` keeps them, so build the parser with `bidiIsolation: 'none'` where one interpolates.
 - [`parser-icu`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-icu) reads tags as its own rich-text syntax and fails the message. Pass `ignoreTag: true`:
 
   ```ts
@@ -195,6 +197,13 @@ Put the extension in the config [`@sveltekit-i18n/base/kit`](https://github.com/
 ## Size
 
 The markup is parsed with [`parse5`](https://github.com/inikulin/parse5), about 42 kB minified and gzipped with its entity tables — this package's one runtime dependency, and the price of a tree that matches the browser's. With the extension's own code, an app's client bundle grows by about 48 kB gzipped.
+
+## Documentation
+
+- 🌐 [sveltekit-i18n.github.io](https://sveltekit-i18n.github.io) – The documentation site, with a live playground
+- 📖 [@sveltekit-i18n/base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) – The core, and the `extensions` reference
+- 📚 [Documentation Index](https://github.com/sveltekit-i18n/lib/tree/master/docs/INDEX.md) – Guides, tutorials and best practices
+- 💡 [Example](https://github.com/sveltekit-i18n/lib/tree/master/examples/html) – A SvelteKit app that renders markup through `T`
 
 ## Issues
 
