@@ -6,7 +6,7 @@ import type { Readable } from 'svelte/store';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import stores from '../../src';
-import type { Output } from '../../src';
+import type { Output, Stores } from '../../src';
 import { inDestroyedEffect, subscribeInEffect } from '../effects.svelte';
 
 const CONFIG: Config.T = {
@@ -477,6 +477,44 @@ describe('stores extension', () => {
     translations.unsubscribe();
   });
 
+  it('passes `preload` through, detached, and its token to the call it serves', async () => {
+    let calls = 0;
+    const output = stores(new I18n({
+      initLocale: 'en',
+      parser: CONFIG.parser,
+      log: CONFIG.log,
+      translations: { en: { common: { hi: 'Hello!' } } },
+      loaders: [
+        {
+          namespace: 'about',
+          locale: 'cs',
+          routes: ['/about'],
+          // Runs on every call that selects it, unless handed a preload's token.
+          cache: false,
+          loader: async () => ({ title: `About us ${++calls}` }),
+        },
+      ],
+    }));
+
+    const { preload, setRoute } = output;
+    const preloaded = await preload('cs', '/about');
+
+    // A preload switches nothing.
+    expect(output.locale.get()).toBe('en');
+    expect(output.loading.get()).toBe(false);
+
+    await output.loadTranslations('cs', '/about', { preloaded });
+
+    expect(output.locale.get()).toBe('cs');
+    expect(output.t.get()('about.title')).toBe('About us 1');
+    expect(calls).toBe(1);
+
+    await setRoute('/about', { preloaded: await preload('cs', '/about') });
+
+    expect(output.t.get()('about.title')).toBe('About us 2');
+    expect(calls).toBe(2);
+  });
+
   it('hands a snapshot over through `hydrate`, so the client fetches nothing', async () => {
     const calls = { server: 0, client: 0 };
     const config = (side: keyof typeof calls): Config.T => ({
@@ -558,6 +596,27 @@ describe('stores extension', () => {
     // the surface drifted and must be reconciled.
     expectTypeOf<Exclude<keyof I18n, keyof Output>>().toEqualTypeOf<never>();
     expectTypeOf<Exclude<keyof Output, keyof I18n>>().toEqualTypeOf<'instance'>();
+
+    const i18n = new I18n(CONFIG);
+    const out = stores(i18n);
+
+    // Each method is typed as the instance types it.
+    expectTypeOf<Omit<typeof out, keyof Stores | 'instance'>>().toEqualTypeOf<Omit<typeof i18n, keyof Stores>>();
+
+    const output: Record<string, unknown> = { ...out };
+    const core = [...Object.keys(i18n), ...Object.getOwnPropertyNames(Object.getPrototypeOf(i18n))]
+      .filter((key) => key !== 'constructor');
+
+    expect(Object.keys(output).sort()).toEqual([...new Set([...core, 'instance'])].sort());
+
+    // A property becomes a store of it; a method is the instance's own.
+    for (const key of core) {
+      const member = (i18n as unknown as Record<string, unknown>)[key];
+      const forwarded = output[key] as { subscribe?: unknown; get?: () => unknown };
+
+      if (typeof forwarded?.subscribe === 'function') expect(forwarded.get?.()).toBe(member);
+      else expect(forwarded).toBe(member);
+    }
   });
 
   it('exposes the pre-preprocess tables through `rawTranslations`', () => {

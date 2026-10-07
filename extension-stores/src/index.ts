@@ -8,6 +8,9 @@ type AnyI18n = I18n<any, any, any, any>;
 
 export type WithGet<Store, Value> = Store & { get: () => Value };
 
+/** A member a later core added: `undefined` on a core without it, as the runtime passes it. */
+type Since<I, K extends string> = K extends keyof I ? I[K] : undefined;
+
 export interface Stores<I extends AnyI18n = AnyI18n> {
   t: WithGet<Readable<I['t']>, I['t']>;
   l: WithGet<Readable<I['l']>, I['l']>;
@@ -21,6 +24,7 @@ export interface Stores<I extends AnyI18n = AnyI18n> {
 
 export interface Output<I extends AnyI18n = AnyI18n> extends Stores<I> {
   loadTranslations: I['loadTranslations'];
+  preload: Since<I, 'preload'>;
   loadNamespace: I['loadNamespace'];
   setLocale: I['setLocale'];
   setRoute: I['setRoute'];
@@ -46,7 +50,7 @@ const cache = new WeakMap<object, Output>();
 const stores = <I extends AnyI18n>(i18n: I): Output<I> => {
   const memoized = cache.get(i18n);
 
-  if (memoized) return memoized as Output<I>;
+  if (memoized) return memoized as unknown as Output<I>;
 
   const fromInstance = tracker();
   const withGet = <S extends Readable<V>, V>(store: S, get: () => V): WithGet<S, V> => Object.assign(fromInstance(store, get), { get });
@@ -67,6 +71,7 @@ const stores = <I extends AnyI18n>(i18n: I): Output<I> => {
     t: withGet(toStore(() => i18n.t), () => i18n.t),
     l: withGet(toStore(() => i18n.l), () => i18n.l),
     loadTranslations: i18n.loadTranslations,
+    preload: i18n.preload,
     loadNamespace: i18n.loadNamespace,
     setLocale: i18n.setLocale,
     setRoute: i18n.setRoute,
@@ -81,7 +86,7 @@ const stores = <I extends AnyI18n>(i18n: I): Output<I> => {
 
   cache.set(i18n, output);
 
-  return output as Output<I>;
+  return output as unknown as Output<I>;
 };
 
 export default stores as typeof stores & Extension.Generic<WithStores>;
