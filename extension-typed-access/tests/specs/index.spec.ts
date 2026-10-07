@@ -14,7 +14,7 @@ import { track } from '../effects.svelte';
 // The fixture carries no schema: the runtime is exercised untyped, the types in types.spec.ts.
 const make = () => typedAccess(new I18n(CONFIG)) as any;
 
-const METHODS = ['loadTranslations', 'loadNamespace', 'setLocale', 'setRoute', 'loadConfig', 'addTranslations', 'invalidate', 'snapshot', 'hydrate', 'destroy'] as const;
+const METHODS = ['loadTranslations', 'preload', 'loadNamespace', 'setLocale', 'setRoute', 'loadConfig', 'addTranslations', 'invalidate', 'snapshot', 'hydrate', 'destroy'] as const;
 
 describe('the tree', () => {
   it('forwards a call to t with the dotted path and the params as given', () => {
@@ -234,6 +234,28 @@ describe('the surface', () => {
     await setLocale('cs');
 
     expect(instance.locale).toBe('cs');
+  });
+
+  it('passes preload through, and its token to the call it serves', async () => {
+    let fetches = 0;
+    // Runs on every call that selects it, unless handed a preload's token.
+    const loader = async () => ({ title: `O nás ${++fetches}` });
+    const out = typedAccess(new I18n({ ...CONFIG, preprocess: 'full', loaders: [{ locale: 'cs', namespace: 'about', routes: ['/about'], cache: false, loader }] })) as any;
+    const { preload } = out;
+    const preloaded = await preload('cs', '/about');
+
+    // A preload switches nothing.
+    expect(out.locale).toBe('en');
+
+    await out.loadTranslations('cs', '/about', { preloaded });
+
+    expect(out.locale).toBe('cs');
+    expect(out.t.about.title()).toBe('O nás 1');
+
+    await out.setRoute('/about', { preloaded: await preload('cs', '/about') });
+
+    expect(out.t.about.title()).toBe('O nás 2');
+    expect(fetches).toBe(2);
   });
 
   it('throws on assigning a read', () => {
