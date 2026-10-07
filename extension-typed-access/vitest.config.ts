@@ -12,9 +12,10 @@ const forceJsPluginPipeline = { name: 'force-js-plugin-pipeline', transform() {}
 const SERVER_SPEC = 'tests/specs/server.spec.ts';
 
 // Everything must go through the vite pipeline (not node's own resolution):
-// base and extension-stores ship rune modules uncompiled, and svelte needs
-// the browser-condition resolve in the client project.
-const inline = ['@sveltekit-i18n/base', '@sveltekit-i18n/extension-stores', /\/svelte\//, /^svelte$/];
+// base and extension-stores ship rune modules uncompiled, extension-html its
+// components, and svelte needs the browser-condition resolve in the client
+// project.
+const inline = ['@sveltekit-i18n/base', '@sveltekit-i18n/extension-stores', '@sveltekit-i18n/extension-html', /\/svelte\//, /^svelte$/];
 
 export default defineConfig({
   test: {
