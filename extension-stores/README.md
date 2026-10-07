@@ -54,14 +54,14 @@ In the browser the stores follow the instance from the microtask after the exten
 | `l` | readable | Locale-explicit translation function: `$l('en', 'key', ...params)`. A fresh function is emitted whenever the translations or the config change; a locale switch alone emits none, since the locale is an argument. |
 | `locale` | **writable** | The active locale. Setting it (`locale.set('en')`, `$locale = 'en'`) triggers a fire-and-forget locale switch; the store emits once the switch completes. A falsy value is ignored, exactly as it is on the instance. A switch that a loader's SvelteKit `redirect()` or `error()` below 500 rejects is only logged: the store stays on the old locale and does not emit, so a `<select bind:value={$locale}>` keeps showing the refused option. For an awaitable switch that receives the rejection, use `setLocale`. |
 | `locales` | readable | All known locales: the loaders' and those of loaded or added translations. |
-| `loading` | readable | `true` while a load that switches the locale or the route is in flight — `setLocale`, `setRoute`, `loadTranslations` or setting `locale`. A load of `loadNamespace()` or `loadTranslations(…, { activate: false })` does not count unless an activating call joins it; await what they return instead. |
+| `loading` | readable | `true` while a load that switches the locale or the route is in flight — `setLocale`, `setRoute`, `loadTranslations` or setting `locale`. A load of `loadNamespace()`, `preload()` or `loadTranslations(…, { activate: false })` does not count unless an activating call joins it; await what they return instead. |
 | `initialized` | readable | `true` once a locale and route are set and translations are present. |
 | `translations` | readable | The loaded translation tables. |
 | `rawTranslations` | readable | The loaded translation tables before preprocessing. |
 
 ### Methods
 
-`loadTranslations`, `loadNamespace`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot`, `hydrate` and `destroy` are passed through from the instance, pre-bound — safe to destructure. See the [base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for what each does.
+`loadTranslations`, `preload`, `loadNamespace`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot`, `hydrate` and `destroy` are passed through from the instance, pre-bound — safe to destructure. See the [base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for what each does. [`preload()`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#preloadlocale-route) comes with base 3.3 — not with `sveltekit-i18n` 3.3.0, which pins base 3.2.0: on an earlier core, `preload` is `undefined`, and typed so.
 
 ### Server-rendered apps
 

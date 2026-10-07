@@ -23,5 +23,6 @@
     "./tests",
     "./*.js",
     "./*.ts"
-  ]
+  ],
+  "exclude": ["./tests/types"]
 }

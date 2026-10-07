@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   // Build outputs; node_modules is ignored by default.
-  { ignores: ['**/dist/', '**/.svelte-kit/'] },
+  { ignores: ['**/dist/', '**/.svelte-kit/', 'tests/types/'] },
   js.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   {
