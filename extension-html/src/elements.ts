@@ -39,6 +39,19 @@ export const isAllowedAttribute = (tag: string, attribute: string) => GLOBAL_ATT
 
 export const URL_ATTRIBUTES = ['href'];
 
+const TEXT_ATTRIBUTES = ['title'];
+
+// What MF2 isolates a placeholder with and `Intl` marks a number or a date with.
+const BIDI_CONTROLS = /\p{Bidi_Control}/gu;
+
+/**
+ * The value an attribute renders and is checked with. Bidi controls order
+ * text, so only a value read as text keeps them: in a URL, a number or a
+ * keyword they make another value — a path the browser percent-encodes them
+ * into, a scheme the check cannot see, a `target` that is no `_blank`.
+ */
+export const attributeValue = (attribute: string, value: string) => (TEXT_ATTRIBUTES.includes(attribute) ? value : value.replace(BIDI_CONTROLS, ''));
+
 export const BOOLEAN_ATTRIBUTES = ['open', 'reversed'];
 
 const URL_SCHEMES = ['http', 'https', 'mailto', 'tel'];

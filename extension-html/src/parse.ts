@@ -1,7 +1,7 @@
 import { defaultTreeAdapter, html, parseFragment } from 'parse5';
 import type { DefaultTreeAdapterTypes } from 'parse5';
 
-import { BOOLEAN_ATTRIBUTES, URL_ATTRIBUTES, isAllowedAttribute, isAllowedUrl } from './elements.js';
+import { BOOLEAN_ATTRIBUTES, URL_ATTRIBUTES, attributeValue, isAllowedAttribute, isAllowedUrl } from './elements.js';
 
 export type Element = {
   tag: string;
@@ -165,7 +165,9 @@ export const parse = (message: string): { parts: Part[]; dropped: Dropped[] } =>
     if (!element.sourceCodeLocation) return {};
 
     const broken = hasError(element);
-    const attributes = attrs.reduce<Element['attributes']>((all, { name, value }) => {
+    const attributes = attrs.reduce<Element['attributes']>((all, { name, value: written }) => {
+      const value = attributeValue(name, written);
+
       if (broken || isUnquoted(element, name) || !isAllowedAttribute(tag, name) || (INTEGER_ATTRIBUTES.includes(name) && !isInteger(value))) {
         dropped.push({ code: 'attribute-dropped', tag, attribute: name });
 

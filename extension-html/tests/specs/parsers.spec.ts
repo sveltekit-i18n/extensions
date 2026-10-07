@@ -63,3 +63,50 @@ describe('the official parsers', () => {
     });
   });
 });
+
+describe('bidi controls in an attribute value', () => {
+  const rendered = (message: string, params: Record<string, unknown>, locale = 'en') => {
+    const reports: { code: string; attribute?: string }[] = [];
+    const i18n = html({ onReport: (report) => reports.push(report), components: BLOCK_ELEMENTS })(new I18n({
+      initLocale: locale,
+      parser: mf2({ onReport: null }),
+      translations: { [locale]: { k: message } },
+    }));
+    const page = render(i18n, () => ({ key: 'k', params }));
+    const markup = page.html();
+
+    page.destroy();
+
+    return { markup, reports: reports.map(({ code, attribute }) => [code, attribute]) };
+  };
+
+  it.each([
+    ['en', '<a href="/docs/{$slug}">a</a>', { slug: 'intro' }, '<a href="/docs/intro">a</a>'],
+    ['ar', '<a href="/docs/{$slug}">a</a>', { slug: 'intro' }, '<a href="/docs/intro">a</a>'],
+    ['ar', '<a href="/p/{$n}">a</a>', { n: 42 }, '<a href="/p/42">a</a>'],
+    ['ar', '<a href="/docs/{$slug :string u:dir=ltr}">a</a>', { slug: 'intro' }, '<a href="/docs/intro">a</a>'],
+    ['ar', '<ol start="{$n}"><li>a</li></ol>', { n: 3 }, '<ol start="3"><li>a</li></ol>'],
+    ['en', '<a href="{$url}">a</a>', { url: 'https://example.com/x' }, '<a href="https://example.com/x">a</a>'],
+    ['en', '<a href="https://{$host}/x">a</a>', { host: 'example.com' }, '<a href="https://example.com/x">a</a>'],
+    ['en', '<a href="&#x200E;https://example.com/x&#x200E;">a</a>', {}, '<a href="https://example.com/x">a</a>'],
+    ['en', '<a href="/x" target="{$t}">a</a>', { t: '_blank' }, '<a href="/x" target="_blank">a</a>'],
+    ['he', '<ol><li value="{$n}">a</li></ol>', { n: -2 }, '<ol><li value="-2">a</li></ol>'],
+    ['en', '<a href="/x" dir="&#x061C;&#x200F;&#x202A;&#x202B;&#x202C;&#x202D;&#x202E;rtl">a</a>', {}, '<a href="/x" dir="rtl">a</a>'],
+    ['en', '<a href="/wiki/{$t}">a</a>', { t: 'a\u200cb' }, '<a href="/wiki/a\u200cb">a</a>'],
+  ])('[%s] %s renders without the marks a value takes as its own', (locale, message, params, expected) => {
+    expect(rendered(message, params, locale)).toEqual({ markup: expected, reports: [] });
+  });
+
+  it('keeps them in a `title`, which is text to read', () => {
+    expect(rendered('<a href="/x" title="By {$n}">a</a>', { n: 'Ann' })).toEqual({ markup: '<a href="/x" title="By \u2068Ann\u2069">a</a>', reports: [] });
+  });
+
+  it.each([
+    ['en', '<a href="{$url}">a</a>', { url: 'javascript:alert(1)' }],
+    ['ar', '<a href="{$url}">a</a>', { url: 'javascript:alert(1)' }],
+    ['en', '<a href="java{$x}script:alert(1)">a</a>', { x: '' }],
+    ['en', '<a href="&#x2068;javascript:alert(1)&#x2069;">a</a>', {}],
+  ])('[%s] %s is checked without the marks', (locale, message, params) => {
+    expect(rendered(message, params, locale)).toEqual({ markup: '<a>a</a>', reports: [['url-blocked', 'href']] });
+  });
+});
