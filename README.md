@@ -15,6 +15,8 @@ const i18n = new I18n({
 
 An extension can augment the instance (attach new capabilities) or replace it entirely with a different consumption surface. The result type is inferred end to end — TypeScript folds the instance type through the `extensions` tuple.
 
+The snippets below import `I18n` from `@sveltekit-i18n/base`. With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), import it from `sveltekit-i18n`, which brings the parser, and do not install base beside it: the app would end up with two copies of the core.
+
 ## Available Extensions
 
 ### [@sveltekit-i18n/extension-stores](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores)
@@ -79,7 +81,13 @@ export const i18n = new I18n({
 });
 ```
 
+[`@sveltekit-i18n/typegen`](https://github.com/sveltekit-i18n/typegen) generates the schema, and from typegen 3.1 also registers its keys nested by segment, which the tree is read off instead of grouping the keys on every compile (see [Cost](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access#cost)).
+
 It composes with `extension-stores` placed after it (`extensions: [typedAccess, stores]`). See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access#readme) for the reserved names, the pipe order and the output reference.
+
+## Combining Extensions
+
+`extension-stores` goes last, since its output is no instance and the other two need one: `extensions: [typedAccess, html({ onReport: null }), stores]` hands out `$t` with the tree, `$t.home.title()`, and the `T` component at `instance.T`.
 
 ## Creating Custom Extensions
 
@@ -118,6 +126,7 @@ See the [`@sveltekit-i18n/base` docs](https://github.com/sveltekit-i18n/base/blo
 - 🌐 [sveltekit-i18n.github.io](https://sveltekit-i18n.github.io) – The documentation site, with a live playground
 - 📖 [@sveltekit-i18n/base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) – The core, and the `extensions` reference
 - 📚 [Documentation Index](https://github.com/sveltekit-i18n/lib/tree/master/docs/INDEX.md) – Guides, tutorials and best practices
+- 💡 [Examples](https://github.com/sveltekit-i18n/lib/tree/master/examples#extensions) – A SvelteKit app on each extension
 
 ## Issues
 
