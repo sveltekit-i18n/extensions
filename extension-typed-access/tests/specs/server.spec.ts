@@ -1,9 +1,11 @@
 import I18n from '@sveltekit-i18n/base';
+import html from '@sveltekit-i18n/extension-html';
 import { render } from 'svelte/server';
 import { expect, it } from 'vitest';
 
 import typedAccess from '../../src';
 import Forgotten from '../components/Forgotten.svelte';
+import Html from '../components/Html.svelte';
 import Page from '../components/Page.svelte';
 
 const loaded = async () => {
@@ -78,4 +80,24 @@ it('forwards every member of the core as the server compiles it, and one it gain
   expect(out.locale).toBe('cs');
   expect(out.locales).toEqual(['cs']);
   expect(out.initialized).toBe(true);
+});
+
+it('renders extension-html\'s T in either order', async () => {
+  const config = {
+    initLocale: 'en',
+    log: { level: 'error' },
+    parser: { parse: (text: unknown, _params: unknown[], _locale: string, key: string) => text ?? key },
+    translations: { en: { 'common.rich': 'Hi <b>there</b>' }, cs: { 'common.rich': 'Ahoj <b>tam</b>' } },
+  } as const;
+  const text = (T: any) => render(Html, { props: { T } }).body.replace(/<!--.*?-->/g, '');
+  const after = new I18n({ ...config, extensions: [typedAccess, html({ onReport: null })] });
+  const before = new I18n({ ...config, extensions: [html({ onReport: null }), typedAccess] });
+
+  expect(text(after.T)).toBe('Hi <b>there</b>');
+  expect(text(before.instance.T)).toBe('Hi <b>there</b>');
+
+  await Promise.all([after.setLocale('cs'), before.setLocale('cs')]);
+
+  expect(text(after.T)).toBe('Ahoj <b>tam</b>');
+  expect(text(before.instance.T)).toBe('Ahoj <b>tam</b>');
 });
