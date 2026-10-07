@@ -392,8 +392,10 @@ describe('the surface', () => {
   });
 
   it('refuses what is no instance, such as the stores surface', () => {
-    expect(() => new I18n({ ...CONFIG, extensions: [stores, typedAccess] })).toThrow(/`typedAccess` takes an instance/);
-    expect(() => typedAccess({} as any)).toThrow(/`typedAccess` takes an instance/);
+    for (const build of [() => new I18n({ ...CONFIG, extensions: [stores, typedAccess] }), () => typedAccess({} as any)]) {
+      expect(build).toThrow(TypeError);
+      expect(build).toThrow('[i18n]: `typedAccess` takes an instance: put it before any extension whose output is no instance, such as `stores`.');
+    }
   });
 
   it('forwards what an extension before it added, which the types leave on instance', () => {

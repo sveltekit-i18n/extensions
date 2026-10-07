@@ -285,7 +285,7 @@ const typedAccess = <I extends Spelled>(input: I): Output<I> => {
   if (memoized) return memoized as Output<I>;
 
   if (typeof i18n?.t !== 'function') {
-    throw new Error('[i18n]: `typedAccess` takes an instance. Place it before any extension that replaces the instance, such as `stores`.');
+    throw new TypeError('[i18n]: `typedAccess` takes an instance: put it before any extension whose output is no instance, such as `stores`.');
   }
 
   // The root follows the identity of the instance's `t`.
