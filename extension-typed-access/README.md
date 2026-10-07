@@ -125,6 +125,7 @@ Grouped here, the tree's cost is in its largest group of keys under one segment,
 - 🌐 [sveltekit-i18n.github.io](https://sveltekit-i18n.github.io) – The documentation site, with a live playground
 - 📖 [@sveltekit-i18n/base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) – The core, and the `extensions` reference
 - 📚 [Documentation Index](https://github.com/sveltekit-i18n/lib/tree/master/docs/INDEX.md) – Guides, tutorials and best practices
+- 💡 [Example](https://github.com/sveltekit-i18n/lib/tree/master/examples/typed-access) – A SvelteKit app that reads its keys through the tree
 
 ## Issues
 
