@@ -53,7 +53,14 @@ the current core to build and test against. The peer range is
 `hydrate()` and `loadNamespace()`, which base 3.1 adds, so they take the
 core's `3.1.0-next` line and every stable 3.x from 3.1.0, and no 3.0 core. The range stays once
 3.1.0 is stable: narrowing it would fail an app still on one of those
-prereleases. `extension-html` uses nothing of 3.1 and takes the parsers'
+prereleases. They also pass through `preload()`, which base 3.3 adds, without
+raising the range: `sveltekit-i18n` pins its core exactly, so npm refuses
+(`ERESOLVE`) to add a package whose peer range that core falls outside, and a
+fresh install of both puts a second core beside the pinned one. On an earlier core
+the member is `undefined` — typed so by `extension-stores`' `Output`, and left
+out of `extension-typed-access`' types, which read the core's own members — so
+a declaration never names a member the consumer's core lacks.
+`extension-html` uses nothing of 3.1 and takes the parsers'
 range, `^3.0.0 || ^3.1.0-next.0`. `npm install` inside a package is the whole setup.
 
 `extension-typed-access` also tests its composition with `extension-stores`
