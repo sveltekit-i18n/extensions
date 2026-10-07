@@ -57,3 +57,25 @@ it('names the coercion a forgotten call ran into', async () => {
 
   expect(render(Forgotten, { props: { i18n } }).body).toContain('<span title="z common.hi.valueOf">common.hi.toString</span>');
 });
+
+it('forwards every member of the core as the server compiles it, and one it gains', async () => {
+  class Grown extends (I18n as unknown as new (config?: object) => object) {
+    #bumps = 0;
+
+    bump() { return ++this.#bumps; }
+  }
+
+  const i18n = new Grown({ log: { level: 'error' } }) as any;
+  const out = typedAccess(i18n) as any;
+  const core = [...Object.keys(i18n), ...Object.getOwnPropertyNames(I18n.prototype), 'bump']
+    .filter((key) => key !== 'constructor');
+
+  expect(Object.keys(out).sort()).toEqual([...new Set([...core, 'instance'])].sort());
+  expect(out.bump()).toBe(1);
+
+  await out.loadConfig({ log: { level: 'error' }, initLocale: 'cs', translations: { cs: { hi: 'Ahoj!' } } });
+
+  expect(out.locale).toBe('cs');
+  expect(out.locales).toEqual(['cs']);
+  expect(out.initialized).toBe(true);
+});

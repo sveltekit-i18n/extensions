@@ -102,9 +102,10 @@ prereleases. They also pass through `preload()`, which base 3.3 adds, without
 raising the range: `sveltekit-i18n` pins its core exactly, so npm refuses
 (`ERESOLVE`) to add a package whose peer range that core falls outside, and a
 fresh install of both puts a second core beside the pinned one. On an earlier core
-the member is `undefined` — typed so by `extension-stores`' `Output`, and left
-out of `extension-typed-access`' types, which read the core's own members — so
-a declaration never names a member the consumer's core lacks.
+the member is `undefined` on `extension-stores`' output, whose `Output` types
+it so, and absent from `extension-typed-access`' output and its types, which
+read the core's own members — so a declaration never names a member the
+consumer's core lacks.
 `extension-html` uses nothing of 3.1 and takes the parsers'
 range, `^3.0.0 || ^3.1.0-next.0`. `npm install` inside a package is the whole setup.
 
@@ -150,6 +151,10 @@ workflow.
   goes before one whose output is no instance (`extension-stores`), since that
   copies a fixed surface; after one whose output still is one
   (`extension-typed-access`), it augments that output.
+- A surface whose types follow the core's members forwards them the same
+  way at runtime: `extension-typed-access` types every member of the core, so
+  it forwards every member the instance has, own or inherited, never a list,
+  and a member a core adds reaches it without a release.
 - Memoize per instance (`WeakMap`) so double application is harmless.
 - Extension packages must not break when applied directly
   (`extension(new I18n(config))`) — tests call them that way.
