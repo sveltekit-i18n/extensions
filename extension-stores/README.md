@@ -10,7 +10,7 @@ Base v3 exposes one runes-based reactive instance. This extension replaces that 
 npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-stores
 ```
 
-With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), install the extension alone — the core comes with it:
+With [`sveltekit-i18n`](https://github.com/sveltekit-i18n/lib), install the extension alone — the core comes with it — and import `I18n` from `sveltekit-i18n` where a snippet here imports it from `@sveltekit-i18n/base`, so the instance gets its parser:
 
 ```sh
 npm i -D @sveltekit-i18n/extension-stores
@@ -40,6 +40,15 @@ The extension can also be applied to an existing instance directly — `stores(i
 
 The output is typed from the instance it wraps, so what the config narrows — the `schema` keys and payloads behind `t`/`l`, the locale union behind `locale` and `setLocale` — survives the pipe.
 
+## Pipe order
+
+The output is no instance, so this extension goes after every extension that needs one — placed after it, `typedAccess` and `html` throw at construction — and the stores follow what the extension before it hands over:
+
+- **`[typedAccess, stores]`**: [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) hands its tree to `$t`, `$t.home.title()` beside `$t('home.title')`, typed from the schema. `instance` is its output, and `instance.instance` the core.
+- **`[html(…), stores]`**: the stores carry no `T`; [`extension-html`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html)'s component is at `instance.T`.
+- **`[typedAccess, html(…), stores]`** does both: `$t` carries the tree, and `instance.T` is the component.
+
+
 ## Output
 
 ### Stores
@@ -61,7 +70,7 @@ In the browser the stores follow the instance from the microtask after the exten
 
 ### Methods
 
-`loadTranslations`, `preload`, `loadNamespace`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot`, `hydrate` and `destroy` are passed through from the instance, pre-bound — safe to destructure. See the [base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for what each does. [`preload()`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#preloadlocale-route) comes with base 3.3 — not with `sveltekit-i18n` 3.3.0, which pins base 3.2.0: on an earlier core, `preload` is `undefined`, and typed so.
+`loadTranslations`, `preload`, `loadNamespace`, `setLocale`, `setRoute`, `loadConfig`, `addTranslations`, `invalidate`, `snapshot`, `hydrate` and `destroy` are passed through from the instance, pre-bound — safe to destructure. See the [base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) for what each does. [`preload()`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#preloadlocale-route) comes with base 3.3, which `sveltekit-i18n` carries from 3.4.0: on an earlier core, `preload` is `undefined`, and typed so.
 
 ### Server-rendered apps
 
@@ -92,7 +101,7 @@ On the server, Svelte's stores do not track the instance: a subscription reads i
 
 ### `instance`
 
-The untouched `I18n` instance, as an escape hatch to the full runes-based API.
+The instance the extension received, as an escape hatch to the full runes-based API: the core when the extension runs alone, the output of the extension before it otherwise ([pipe order](#pipe-order)).
 
 ## Upgrading from 3.0
 
