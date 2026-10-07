@@ -2,6 +2,7 @@ import { inspect } from 'node:util';
 
 import I18n from '@sveltekit-i18n/base';
 import type { Extension } from '@sveltekit-i18n/base';
+import I18n32 from '@sveltekit-i18n/base-3.2';
 import stores from '@sveltekit-i18n/extension-stores';
 import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
@@ -163,6 +164,69 @@ describe('the surface', () => {
     for (const method of METHODS) expect(out[method]).toBe((i18n as any)[method]);
   });
 
+  it('forwards no member its core lacks', () => {
+    const out = typedAccess(new I18n32(CONFIG) as any) as any;
+
+    expect('preload' in out.instance).toBe(false);
+    expect('preload' in out).toBe(false);
+    expect(typeof out.loadNamespace).toBe('function');
+  });
+
+  it('forwards a member the core gains, as the core has it', async () => {
+    const symbol = Symbol('member');
+
+    class Grown extends (I18n as unknown as new (config?: object) => object) {
+      #mode = 'a';
+
+      #bumps = 0;
+
+      field = (n: number) => n + 1;
+
+      [symbol] = 'symbol';
+
+      get mode() { return this.#mode; }
+
+      set mode(mode: string) { this.#mode = mode; }
+
+      get fixed() { return 'fixed'; }
+
+      bump() { return ++this.#bumps; }
+    }
+
+    const i18n = new Grown(CONFIG) as any;
+    const out = typedAccess(i18n) as any;
+
+    expect(out.field).toBe(i18n.field);
+    expect(out[symbol]).toBe('symbol');
+    expect(out.fixed).toBe('fixed');
+    expect(() => { out.fixed = 'x'; }).toThrow(TypeError);
+
+    out.mode = 'b';
+
+    expect(i18n.mode).toBe('b');
+
+    i18n.mode = 'c';
+
+    expect(out.mode).toBe('c');
+
+    // A method of the prototype is bound to the instance, private members included.
+    const { bump } = out;
+
+    expect(bump()).toBe(1);
+    expect(out.bump()).toBe(2);
+
+    // What every object answers stays the output's own.
+    for (const name of ['constructor', 'toString', 'hasOwnProperty', '__proto__']) expect(Object.hasOwn(out, name)).toBe(false);
+
+    expect(Object.getPrototypeOf(out)).toBe(Object.prototype);
+
+    // Assigning a member the instance takes assigns the instance's, as on the instance.
+    out.locale = 'cs';
+    await i18n.setLocale('cs');
+
+    expect(out.locale).toBe('cs');
+  });
+
   it('reads every member from the instance as it changes', async () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => { release = resolve; });
@@ -258,11 +322,28 @@ describe('the surface', () => {
     expect(fetches).toBe(2);
   });
 
-  it('throws on assigning a read', () => {
-    const out = make();
+  it('takes an assignment where the instance does, but to t', () => {
+    const throws = (target: any, name: string) => {
+      try {
+        const value = target[name];
 
-    for (const name of ['t', 'l', 'locales', 'loading', 'initialized', 'translations', 'rawTranslations']) {
-      expect(() => { out[name] = undefined; }).toThrow(TypeError);
+        target[name] = value;
+      } catch (error) {
+        expect(error).toBeInstanceOf(TypeError);
+
+        return true;
+      }
+
+      return false;
+    };
+
+    expect(throws(make(), 't')).toBe(true);
+    expect(throws(make(), 'translations')).toBe(true);
+
+    for (const name of ['l', 'locale', 'locales', 'loading', 'initialized', 'translations', 'rawTranslations']) {
+      const out = make();
+
+      expect(throws(out, name)).toBe(throws(new I18n(CONFIG), name));
     }
   });
 
@@ -315,12 +396,16 @@ describe('the surface', () => {
     expect(() => typedAccess({} as any)).toThrow(/`typedAccess` takes an instance/);
   });
 
-  it('forwards none of what an extension before it added', () => {
+  it('forwards what an extension before it added, which the types leave on instance', () => {
     const add: Extension.T<any, any> = (i18n) => Object.assign(i18n, { extra: 1 });
     const out = new I18n({ ...CONFIG, extensions: [add, typedAccess] }) as any;
 
     expect(out.instance.extra).toBe(1);
-    expect(out.extra).toBeUndefined();
+    expect(out.extra).toBe(1);
+
+    out.instance.extra = 2;
+
+    expect(out.extra).toBe(2);
   });
 });
 

@@ -157,8 +157,8 @@ export type Tree<I> = I extends I18n<infer P, infer O, infer S, any> ? Build<S, 
 
 /**
  * The core members of the instance, as it types them (a patched `loadConfig`
- * included), and not what an extension before this one added: the output
- * forwards the core's members only. An instance a declaration file spells out
+ * included), and not what an extension before this one added, which the
+ * output forwards at runtime and types on `instance` only. An instance a declaration file spells out
  * keeps the private brand it spells for the class, so the output still fits
  * where that type is asked for. `keyof` is spelled out: a library's
  * declarations cannot name a local alias.
@@ -250,6 +250,34 @@ const root = (t: T): T => new Proxy(t, {
 
 const cache = new WeakMap<object, Output>();
 
+/**
+ * Defines on the output every member the instance has, own or inherited, that
+ * the output does not define yet: what a core gains is forwarded without a
+ * change here. A method is copied, bound to the instance where a prototype
+ * holds it, so it stays safe to destructure; anything else reads, and writes
+ * where the instance takes a write, the instance's member as it is now.
+ * What every object answers stays the output's own.
+ */
+const forward = (output: Record<PropertyKey, unknown>, i18n: Record<PropertyKey, unknown>) => {
+  for (let from: object | null = i18n; from !== null && from !== Object.prototype; from = Object.getPrototypeOf(from)) {
+    for (const key of Reflect.ownKeys(from)) {
+      if (key === 'constructor' || key === 'instance' || Object.hasOwn(output, key)) continue;
+
+      const member = Object.getOwnPropertyDescriptor(from, key)!;
+      const { value } = member;
+
+      Object.defineProperty(output, key, typeof value === 'function'
+        ? { value: from === i18n ? value : (value as T).bind(i18n), writable: true, enumerable: true, configurable: true }
+        : {
+          get: () => i18n[key],
+          set: member.set || member.writable ? (next: unknown) => { i18n[key] = next; } : undefined,
+          enumerable: true,
+          configurable: true,
+        });
+    }
+  }
+};
+
 const typedAccess = <I extends Spelled>(input: I): Output<I> => {
   const i18n = input as AnyI18n;
   const memoized = cache.get(i18n);
@@ -271,35 +299,15 @@ const typedAccess = <I extends Spelled>(input: I): Output<I> => {
 
       return current[1];
     },
-    get l() { return i18n.l; },
-    get locale() { return i18n.locale; },
-    set locale(locale) {
-      // Assignment is the instance's fire-and-forget `setLocale()`.
-      i18n.locale = locale;
-    },
-    get locales() { return i18n.locales; },
-    get loading() { return i18n.loading; },
-    get initialized() { return i18n.initialized; },
-    get translations() { return i18n.translations; },
-    get rawTranslations() { return i18n.rawTranslations; },
-    loadTranslations: i18n.loadTranslations,
-    preload: i18n.preload,
-    loadNamespace: i18n.loadNamespace,
-    setLocale: i18n.setLocale,
-    setRoute: i18n.setRoute,
-    loadConfig: i18n.loadConfig,
-    addTranslations: i18n.addTranslations,
-    invalidate: i18n.invalidate,
-    snapshot: i18n.snapshot,
-    hydrate: i18n.hydrate,
-    destroy: i18n.destroy,
-    instance: i18n,
-  } as unknown as Output;
+  } as Record<PropertyKey, unknown>;
 
-  cache.set(i18n, output);
-  cache.set(output, output);
+  forward(output, i18n as unknown as Record<PropertyKey, unknown>);
+  output.instance = i18n;
 
-  return output as Output<I>;
+  cache.set(i18n, output as unknown as Output);
+  cache.set(output, output as unknown as Output);
+
+  return output as unknown as Output<I>;
 };
 
 // The brand alone: `Extension.Generic` would add a call signature that takes anything.
