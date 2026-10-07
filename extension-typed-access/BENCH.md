@@ -1,9 +1,9 @@
 # Benchmark
 
-What `npm run bench` measured on `@sveltekit-i18n/extension-typed-access` 3.0.0, written by the release that published it. A pull request compares its branch with its base in a comment; this file keeps the figures of each release beside its code.
+What `npm run bench` measured on `@sveltekit-i18n/extension-typed-access` 3.0.1, written by the release that published it. A pull request compares its branch with its base in a comment; this file keeps the figures of each release beside its code.
 
 Node v24.21.0, linux x64; times are medians of 11 processes, each the median of its rounds, and heap held is the median of as many processes again, each giving one reading per row. A spread leaves out a quarter of a row's samples, rounded down, at each end. Sizes include the extension's dependencies and leave out its peers.
-It runs on @sveltekit-i18n/base 3.3.0, svelte 5.57.1, typescript 5.9.3.
+It runs on @sveltekit-i18n/base 3.3.1, svelte 5.57.1, typescript 5.9.3.
 Dependencies: none.
 
 ## Counts
@@ -52,11 +52,11 @@ Microseconds and milliseconds, of one machine at one time: compare them only wit
 
 | Row | Median | Spread |
 | --- | ---: | --- |
-| t(key) through the output, a key of 3 segments | 0.0475 µs | 0.0455 µs to 0.0747 µs |
-| t.a(), a member path of 1 segment | 0.167 µs | 0.155 µs to 0.208 µs |
-| t.a.b.c(), a member path of 3 segments | 0.315 µs | 0.307 µs to 0.325 µs |
-| t.a.b.c.d.e.f(), a member path of 6 segments | 0.593 µs | 0.59 µs to 0.601 µs |
-| typedAccess(instance), a new instance | 1.22 µs | 1.2 µs to 1.27 µs |
+| t(key) through the output, a key of 3 segments | 0.0447 µs | 0.0355 µs to 0.0612 µs |
+| t.a(), a member path of 1 segment | 0.127 µs | 0.111 µs to 0.147 µs |
+| t.a.b.c(), a member path of 3 segments | 0.238 µs | 0.235 µs to 0.241 µs |
+| t.a.b.c.d.e.f(), a member path of 6 segments | 0.462 µs | 0.457 µs to 0.464 µs |
+| typedAccess(instance), a new instance | 1.06 µs | 1.04 µs to 1.12 µs |
 
 ## Heap
 
