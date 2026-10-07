@@ -458,6 +458,7 @@ describe('reactivity', () => {
     expect(get<any>(out.t).a.b()).toBe('AB-cs');
     expect(typeof out.loadNamespace).toBe('function');
     expect(typeof out.hydrate).toBe('function');
+    expect(typeof out.preload).toBe('function');
     expect(out.instance.instance).toBeDefined();
 
     stop();
