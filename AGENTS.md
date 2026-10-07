@@ -36,7 +36,52 @@ the [sveltekit-i18n](https://github.com/sveltekit-i18n/lib) ecosystem
   CHANGELOG file: release notes are the GitHub Releases `publish.yml` creates
   per package tag (`extension-stores@<version>`).
 - The root holds only `README.md` (extension pipe overview + package index),
-  this file, `CLAUDE.md`, `.gitignore`, and `.github/workflows/`.
+  this file, `CLAUDE.md`, `.gitignore`, `.github/workflows/` and `bench/`.
+- **`bench/` is the shared benchmark** (base's §4, step 3), run from a
+  package directory as `npm run bench`, or `npm run bench -- --compare <dir>`
+  against the same package checked out and installed at `<dir>`. `run.mjs`
+  and `measure.mjs` are plain JavaScript that import nothing but Node's own
+  modules, so Node runs them as they are and nothing type-checks or lints
+  them — match the conventions by hand; `bench.d.ts` types what a package's
+  modules receive. `run.mjs` builds each tree with its own toolchain and
+  starts `measure.mjs` once per project and sample: counts and sizes once per
+  side, times and heap in alternating processes. A package measures through
+  `bench/counts.ts`, `times.ts` and `heap.ts`, each a default export of the
+  `Measure` type, bundled per tree with the rolldown of vite's install and the
+  `svelte` compiler — for the browser, or for the server when it is named
+  `<project>.server.ts`. The package's own name resolves to the tree's
+  `dist/`, its dependencies to the tree's install, and the core, `svelte` and
+  the tools to the install of the package it runs from, so both sides run
+  beside one copy of each and a difference between them is the tree's. Each
+  package's size rows are a minified browser bundle of everything it exports,
+  its dependencies included and its peers left out. `extension-typed-access`
+  counts the checker's instantiations of a call through the tree, by key
+  shape (flat keys, namespaces of 10 keys, one namespace) and size, on keys
+  the extension groups and on the levels typegen registers, and times the
+  proxy per segment; `extension-stores` counts the emissions a subscriber
+  gets per update and times subscribing and an update reaching subscribers;
+  `extension-html` times a server render per kind of message. Each package's
+  heap rows run under `--expose-gc --max-opt=0` and are bounded — per call,
+  per subscription, per render and per instance wrapped and dropped, after
+  enough of them that a `WeakMap`'s table has grown to the size it is read
+  at. Each reads the median of three rounds from a collected heap (`hold`), so
+  a pointer kept per operation shows in every round while a one-off lands in
+  one and drops out, and a row that reaches its bound fails the project after
+  the rows are written. `bench-extension-<package>.yml`
+  runs it on every pull request that changes the package's source, manifest,
+  lockfile, `tsconfig.json` or `bench/`, or the shared `bench/`, through the
+  reusable `bench.yml`, and posts the table as a comment per package with
+  `GITHUB_TOKEN`. A project of the branch that fails fails the job; so does
+  the comparison — a count that grew, a row gone missing, a project of the
+  base that failed, though a base over a heap bound is only reported — unless
+  the pull request carries that package's `bench-accepted:<package>` label
+  (`bench-label.yml` re-runs the job when the label changes). A size that
+  grew, a time whose spread lies wholly above the base's with its median up
+  by 5% or more and heap held whose spread lies 2 B or more above the base's
+  are flagged for review; a
+  spread leaves out the lowest and the highest quarter of a row's samples,
+  rounded down. `publish.yml` writes the package's `BENCH.md` into the
+  release commit.
 
 ## Tech stack (per package — same as `base`)
 
