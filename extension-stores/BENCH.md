@@ -1,9 +1,9 @@
 # Benchmark
 
-What `npm run bench` measured on `@sveltekit-i18n/extension-stores` 3.2.0, written by the release that published it. A pull request compares its branch with its base in a comment; this file keeps the figures of each release beside its code.
+What `npm run bench` measured on `@sveltekit-i18n/extension-stores` 3.2.1, written by the release that published it. A pull request compares its branch with its base in a comment; this file keeps the figures of each release beside its code.
 
 Node v24.21.0, linux x64; times are medians of 11 processes, each the median of its rounds, and heap held is the median of as many processes again, each giving one reading per row. A spread leaves out a quarter of a row's samples, rounded down, at each end. Sizes include the extension's dependencies and leave out its peers.
-It runs on @sveltekit-i18n/base 3.3.0, svelte 5.56.9, typescript 5.9.3.
+It runs on @sveltekit-i18n/base 3.3.1, svelte 5.56.9, typescript 5.9.3.
 Dependencies: none.
 
 ## Counts
@@ -31,10 +31,10 @@ Microseconds and milliseconds, of one machine at one time: compare them only wit
 
 | Row | Median | Spread |
 | --- | ---: | --- |
-| stores(instance), a new instance | 6 µs | 5.78 µs to 6.17 µs |
-| subscribe and unsubscribe, the t store | 0.173 µs | 0.149 µs to 0.193 µs |
-| get(), the t store | 0.0259 µs | 0.0135 µs to 0.0325 µs |
-| setLocale() reaching 100 subscribers of the t store | 0.0538 ms | 0.0473 ms to 0.0561 ms |
+| stores(instance), a new instance | 6.55 µs | 6.28 µs to 7.18 µs |
+| subscribe and unsubscribe, the t store | 0.279 µs | 0.248 µs to 0.299 µs |
+| get(), the t store | 0.0343 µs | 0.0213 µs to 0.0397 µs |
+| setLocale() reaching 100 subscribers of the t store | 0.0824 ms | 0.0772 ms to 0.0915 ms |
 
 ## Heap
 
