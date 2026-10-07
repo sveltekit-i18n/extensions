@@ -1,0 +1,28 @@
+name: Stores extension bench
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - extension-stores/src/**
+      - extension-stores/bench/**
+      - extension-stores/package.json
+      - extension-stores/package-lock.json
+      - extension-stores/tsconfig.json
+      - bench/**
+      - .github/workflows/bench-extension-stores.yml
+      - .github/workflows/bench.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: bench-${{ github.event.pull_request.number }}-extension-stores
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    uses: ./.github/workflows/bench.yml
+    with:
+      package: extension-stores

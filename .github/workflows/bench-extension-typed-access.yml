@@ -1,0 +1,28 @@
+name: Typed access extension bench
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - extension-typed-access/src/**
+      - extension-typed-access/bench/**
+      - extension-typed-access/package.json
+      - extension-typed-access/package-lock.json
+      - extension-typed-access/tsconfig.json
+      - bench/**
+      - .github/workflows/bench-extension-typed-access.yml
+      - .github/workflows/bench.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: bench-${{ github.event.pull_request.number }}-extension-typed-access
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    uses: ./.github/workflows/bench.yml
+    with:
+      package: extension-typed-access
