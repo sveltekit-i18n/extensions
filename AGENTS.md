@@ -132,8 +132,8 @@ an artifact typegen's `master` emits.
 
 A release is planned with the rest of the family (base's §4, *Releases*):
 after `base`, before `sveltekit-i18n`. Each package's `README.md` is its npm
-page, so it describes the version being published, and each of its links
-resolves.
+page, so it describes the version being published, leaves out nothing it or
+the family brings, and each of its links resolves.
 
 `publish.yml` releases one package per run, by trusted publishing, which npm
 configures only for a package that exists: a new package's first version is
