@@ -63,6 +63,30 @@ export const i18n = new I18n({
 
 See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html#readme) for the component map, the allowlists and the parsers it works with.
 
+### [@sveltekit-i18n/extension-markdown](https://github.com/sveltekit-i18n/extensions/tree/master/extension-markdown)
+
+Adds a `T` component that renders the Markdown a translation carries — CommonMark's inline syntax: emphasis, code, links, images and line breaks — as elements and Svelte components, with URLs gated by scheme and the payload rendered as text, no `{@html}`.
+
+```sh
+npm i -D @sveltekit-i18n/base @sveltekit-i18n/extension-markdown
+```
+
+```ts
+import I18n from '@sveltekit-i18n/base';
+import markdown from '@sveltekit-i18n/extension-markdown';
+
+export const i18n = new I18n({
+  ...config,
+  extensions: [markdown({ onReport: null })],
+});
+```
+
+```svelte
+<i18n.T key="intro" params={{ name }} />
+```
+
+An instance takes `extension-html` or this one, not both: each adds `T`. See the [package README](https://github.com/sveltekit-i18n/extensions/tree/master/extension-markdown#readme) for the syntax, the component map and the parsers it works with.
+
 ### [@sveltekit-i18n/extension-typed-access](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access)
 
 Adds typed member access, `t.cart.summary.itemCount({ count: 3 })`, beside `t('cart.summary.itemCount', { count: 3 })`: the tree is typed from the app's schema and every call goes through the instance's own `t`.
@@ -87,7 +111,7 @@ It composes with `extension-stores` placed after it (`extensions: [typedAccess, 
 
 ## Combining Extensions
 
-`extension-stores` goes last, since its output is no instance and the other two need one: `extensions: [typedAccess, html({ onReport: null }), stores]` hands out `$t` with the tree, `$t.home.title()`, and the `T` component at `instance.T`.
+`extension-stores` goes last, since its output is no instance and the others need one: `extensions: [typedAccess, html({ onReport: null }), stores]` hands out `$t` with the tree, `$t.home.title()`, and the `T` component at `instance.T`. `extension-markdown` takes the place of `extension-html` there, never a place beside it.
 
 ## Creating Custom Extensions
 
@@ -126,7 +150,7 @@ See the [`@sveltekit-i18n/base` docs](https://github.com/sveltekit-i18n/base/blo
 - 🌐 [sveltekit-i18n.github.io](https://sveltekit-i18n.github.io) – The documentation site, with a live playground
 - 📖 [@sveltekit-i18n/base docs](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md) – The core, and the `extensions` reference
 - 📚 [Documentation Index](https://github.com/sveltekit-i18n/lib/tree/master/docs/INDEX.md) – Guides, tutorials and best practices
-- 💡 [Examples](https://github.com/sveltekit-i18n/lib/tree/master/examples#extensions) – A SvelteKit app on each extension
+- 💡 [Examples](https://github.com/sveltekit-i18n/lib/tree/master/examples#extensions) – SvelteKit apps on the extensions
 
 ## Issues
 

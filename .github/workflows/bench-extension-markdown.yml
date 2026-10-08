@@ -1,0 +1,28 @@
+name: Markdown extension bench
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - extension-markdown/src/**
+      - extension-markdown/bench/**
+      - extension-markdown/package.json
+      - extension-markdown/package-lock.json
+      - extension-markdown/tsconfig.json
+      - bench/**
+      - .github/workflows/bench-extension-markdown.yml
+      - .github/workflows/bench.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: bench-${{ github.event.pull_request.number }}-extension-markdown
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    uses: ./.github/workflows/bench.yml
+    with:
+      package: extension-markdown
