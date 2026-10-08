@@ -7,7 +7,7 @@
   import { inertPayload } from './payload.js';
   import { DEFAULT_COMPONENTS, apply } from './render.js';
   import Parts from './shared/Parts.svelte';
-  import { resolve } from './shared/resolve.js';
+  import { names, resolve } from './shared/resolve.js';
   import type { Components, Options, Report } from './types.js';
 
   type Props = {
@@ -76,7 +76,7 @@
   const lookup = ({ type }: Node) => {
     const resolved = resolve(type, [DEFAULT_COMPONENTS, options.components, components]);
     // `null` unmaps a node on purpose: nothing to report.
-    const named = [options.components, components].some((layer) => layer !== undefined && Object.hasOwn(layer, type));
+    const named = [options.components, components].some((layer) => names(layer, type));
 
     if (resolved === undefined && !named) {
       report({

@@ -110,7 +110,7 @@ An entry is
 - either of them with props of the app's own, laid over the node's attributes — `link: { component: 'a', props: { class: 'link' } }`;
 - `null`, which unmaps a node a lower layer maps.
 
-A layer's entry replaces a lower layer's entry whole, props included: a usage's `link: Link` drops the `props` the option gave `link`.
+A layer's entry replaces a lower layer's entry whole, props included: a usage's `link: Link` drops the `props` the option gave `link`. An entry of `undefined` is none, so a lower layer's entry applies.
 
 A node no layer maps renders its content without it, and is reported; one a layer unmaps with `null` is not. An image renders its description, a break its line ending, which HTML shows as a space, and paragraphs their content, a blank line apart.
 

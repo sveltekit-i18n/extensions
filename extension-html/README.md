@@ -87,7 +87,7 @@ An entry is
 - either of them with props of the app's own, laid over the tag's attributes — `a: { component: 'a', props: { class: 'link' } }`;
 - `null`, which unmaps a tag a lower layer maps.
 
-A layer's entry replaces a lower layer's entry whole, props included: a usage's `a: Link` drops the `props` the option gave `a`.
+A layer's entry replaces a lower layer's entry whole, props included: a usage's `a: Link` drops the `props` the option gave `a`. An entry of `undefined` is none, so a lower layer's entry applies.
 
 A tag no layer maps is unwrapped — its content renders, the tag does not — and reported. Tag names are matched in lower case, as HTML parses them. SVG and MathML are not HTML: their content renders as text, and each of their tags is reported as unmapped.
 
