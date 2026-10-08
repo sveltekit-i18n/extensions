@@ -190,6 +190,8 @@ export const { t, locale, instance: { T } } = new I18n({ ...config, extensions: 
 
 Put the other way round, `html` throws at construction, and its output type carries no `T`. [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) returns an output that is still an instance, so `html` may go after it and adds `T` beside the tree: `extensions: [typedAccess, html({ onReport: null })]`. `html` is a factory of the options: `extensions: [html]` and `html()` throw too.
 
+[`extension-markdown`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-markdown) adds a `T` too, rendering Markdown: an instance takes one of the two, and the second of them in a pipe throws at construction rather than replace the first's `T`.
+
 ## With SvelteKit
 
 Put the extension in the config [`@sveltekit-i18n/base/kit`](https://github.com/sveltekit-i18n/base/blob/master/docs/README.md#sveltekit) wires, and `data.i18n`, `use()` and `get()` carry `T`. With `sveltekit-i18n` 3.1 or newer, import `defineI18n` from `sveltekit-i18n/kit` instead. The server renders the elements, and the browser hydrates them.
