@@ -29,7 +29,7 @@ const html = (options: Options) => {
       throw new TypeError('html() needs the instance itself: put it before any extension whose output is no instance, such as `stores`.');
     }
 
-    const augmented = withT<I, Props<I>>(i18n, Rich, options);
+    const augmented = withT<I, Props<I>>('html', i18n, Rich, options);
 
     applied.add(i18n);
 

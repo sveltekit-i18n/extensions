@@ -52,6 +52,14 @@ describe('the extension', () => {
     expect(extension(i18n).T).toBe(T);
   });
 
+  it('replaces a `T` it made, and refuses one another extension added', () => {
+    const first = html({ onReport: null })(new I18n(CONFIG));
+    const { T } = first;
+
+    expect(html({ onReport: null })(first).T).not.toBe(T);
+    expect(() => html({ onReport: null })(Object.assign(new I18n(CONFIG), { T: () => undefined }))).toThrow(TypeError);
+  });
+
   it('refuses to be used without its options, or after the instance was replaced', () => {
     expect(() => html(new I18n(CONFIG) as never)).toThrow(TypeError);
     expect(() => (html as (options?: unknown) => unknown)()).toThrow(TypeError);
