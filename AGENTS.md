@@ -60,7 +60,9 @@ the [sveltekit-i18n](https://github.com/sveltekit-i18n/lib) ecosystem
   the extension groups and on the levels typegen registers, and times the
   proxy per segment; `extension-stores` counts the emissions a subscriber
   gets per update and times subscribing and an update reaching subscribers;
-  `extension-html` times a server render per kind of message. Each package's
+  `extension-html` and `extension-markdown` time a server render per kind of
+  message, markdown's crafted ones at two sizes, so a step that grows faster
+  than the message shows as a ratio. Each package's
   heap rows run under `--expose-gc --max-opt=0` and are bounded — per call,
   per subscription, per render and per instance wrapped and dropped, after
   enough of them that a `WeakMap`'s table has grown to the size it is read
@@ -106,8 +108,8 @@ the member is `undefined` on `extension-stores`' output, whose `Output` types
 it so, and absent from `extension-typed-access`' output and its types, which
 read the core's own members — so a declaration never names a member the
 consumer's core lacks.
-`extension-html` uses nothing of 3.1 and takes the parsers'
-range, `^3.0.0 || ^3.1.0-next.0`. `npm install` inside a package is the whole setup.
+`extension-html` and `extension-markdown` use nothing of 3.1 and take the
+parsers' range, `^3.0.0 || ^3.1.0-next.0`. `npm install` inside a package is the whole setup.
 
 `extension-typed-access` also tests its composition with `extension-stores`
 (`[typedAccess, stores]`), against the published stores its lockfile holds.
@@ -147,7 +149,8 @@ workflow.
   the `I18n` constructor's left-to-right pipe. It receives a configured
   instance (after the synchronous prefix of the config load).
 - An extension that replaces the instance must expose the original under an
-  `instance` key as an escape hatch. One that augments it (`extension-html`)
+  `instance` key as an escape hatch. One that augments it (`extension-html`,
+  `extension-markdown`)
   goes before one whose output is no instance (`extension-stores`), since that
   copies a fixed surface; after one whose output still is one
   (`extension-typed-access`), it augments that output.
@@ -155,6 +158,12 @@ workflow.
   way at runtime: `extension-typed-access` types every member of the core, so
   it forwards every member the instance has, own or inherited, never a list,
   and a member a core adds reaches it without a release.
+- `extension-html` and `extension-markdown` each add `T`, so an instance takes
+  one of them: each replaces a `T` it made itself and refuses one another
+  extension added. What both render with lives in each package's
+  `src/shared/`, byte for byte the same, which
+  `extension-markdown/tests/specs/shared.spec.ts` checks; a change to one copy
+  is made to both in the same commit.
 - Memoize per instance (`WeakMap`) so double application is harmless.
 - Extension packages must not break when applied directly
   (`extension(new I18n(config))`) — tests call them that way.
