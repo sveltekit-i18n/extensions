@@ -1,3 +1,4 @@
+import { withoutBidi } from './shared/markup.js';
 import type { Components } from './types.js';
 
 const asThemselves = (names: string[]): Components => names.reduce<Components>((map, name) => ({ ...map, [name]: name }), {});
@@ -41,35 +42,10 @@ export const URL_ATTRIBUTES = ['href'];
 
 const TEXT_ATTRIBUTES = ['title'];
 
-// What MF2 isolates a placeholder with and `Intl` marks a number or a date with.
-const BIDI_CONTROLS = /\p{Bidi_Control}/gu;
-
-/**
- * The value an attribute renders and is checked with. Bidi controls order
- * text, so only a value read as text keeps them: in a URL, a number or a
- * keyword they make another value — a path the browser percent-encodes them
- * into, a scheme the check cannot see, a `target` that is no `_blank`.
- */
-export const attributeValue = (attribute: string, value: string) => (TEXT_ATTRIBUTES.includes(attribute) ? value : value.replace(BIDI_CONTROLS, ''));
+/** The value an attribute renders and is checked with. */
+export const attributeValue = (attribute: string, value: string) => (TEXT_ATTRIBUTES.includes(attribute) ? value : withoutBidi(value));
 
 export const BOOLEAN_ATTRIBUTES = ['open', 'reversed'];
 
-const URL_SCHEMES = ['http', 'https', 'mailto', 'tel'];
-
-/**
- * Whether a URL a translation carries may be rendered: one with no scheme (a
- * relative URL, a fragment) or one of `URL_SCHEMES`. The value arrives with
- * its entities decoded; the URL parser also drops tabs and newlines anywhere
- * and C0 controls and spaces at either end, so `java\tscript:` is checked as
- * the `javascript:` a browser would follow.
- */
-export const isAllowedUrl = (value: string) => {
-  // eslint-disable-next-line no-control-regex
-  const url = value.replace(/[\t\n\r]/g, '').replace(/^[\u0000- ]+|[\u0000- ]+$/g, '');
-  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(url)?.[1];
-
-  return scheme === undefined || URL_SCHEMES.includes(scheme.toLowerCase());
-};
-
-/** Elements that take no children; rendered without any. */
-export const VOID_ELEMENTS = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'];
+/** The schemes a URL a translation carries may have. */
+export const URL_SCHEMES = ['http', 'https', 'mailto', 'tel'];

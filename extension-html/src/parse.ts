@@ -1,7 +1,8 @@
 import { defaultTreeAdapter, html, parseFragment } from 'parse5';
 import type { DefaultTreeAdapterTypes } from 'parse5';
 
-import { BOOLEAN_ATTRIBUTES, URL_ATTRIBUTES, attributeValue, isAllowedAttribute, isAllowedUrl } from './elements.js';
+import { BOOLEAN_ATTRIBUTES, URL_ATTRIBUTES, URL_SCHEMES, attributeValue, isAllowedAttribute } from './elements.js';
+import { isAllowedUrl } from './shared/markup.js';
 
 export type Element = {
   tag: string;
@@ -174,7 +175,7 @@ export const parse = (message: string): { parts: Part[]; dropped: Dropped[] } =>
         return all;
       }
 
-      if (URL_ATTRIBUTES.includes(name) && !isAllowedUrl(value)) {
+      if (URL_ATTRIBUTES.includes(name) && !isAllowedUrl(value, URL_SCHEMES)) {
         dropped.push({ code: 'url-blocked', tag, attribute: name });
 
         return all;

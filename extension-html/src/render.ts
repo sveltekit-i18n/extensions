@@ -1,16 +1,10 @@
 import { defaultTreeAdapter, html, parseFragment } from 'parse5';
 import type { DefaultTreeAdapterTypes } from 'parse5';
-import type { Component } from 'svelte';
 
-import { VOID_ELEMENTS } from './elements.js';
 import type { Element, Part } from './parse.js';
-import type { Resolved } from './resolve.js';
-
-/**
- * A part as it renders: text, or a native element or a component with its
- * props, and the tag of the message it renders.
- */
-export type Rendered = string | { render: string | Component<any>; tag: string; props: Record<string, unknown>; children: Rendered[] };
+import { VOID_ELEMENTS } from './shared/markup.js';
+import type { Resolved } from './shared/resolve.js';
+import type { Rendered } from './shared/types.js';
 
 /** The parts as the map renders them: an unmapped element leaves its children in its place. */
 export const apply = (parts: Part[], lookup: (element: Element) => Resolved | undefined): Rendered[] => parts.flatMap((part) => {

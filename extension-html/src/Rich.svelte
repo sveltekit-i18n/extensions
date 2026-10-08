@@ -2,12 +2,12 @@
   import type { I18n } from '@sveltekit-i18n/base';
   import { untrack } from 'svelte';
 
-  import Parts from './Parts.svelte';
   import { DEFAULT_ELEMENTS } from './elements.js';
   import { escapePayload, parse } from './parse.js';
   import type { Element } from './parse.js';
   import { apply, hydrates, textOf } from './render.js';
-  import { resolve } from './resolve.js';
+  import Parts from './shared/Parts.svelte';
+  import { resolve } from './shared/resolve.js';
   import type { Components, Options, Report } from './types.js';
 
   type Props = {

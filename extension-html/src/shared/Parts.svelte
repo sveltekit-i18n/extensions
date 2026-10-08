@@ -1,7 +1,7 @@
 <script lang="ts">
   import Self from './Parts.svelte';
-  import { VOID_ELEMENTS } from './elements.js';
-  import type { Rendered } from './render.js';
+  import type { Rendered } from './types.js';
+  import { VOID_ELEMENTS } from './markup.js';
 
   const { nodes }: { nodes: Rendered[] } = $props();
 </script>
