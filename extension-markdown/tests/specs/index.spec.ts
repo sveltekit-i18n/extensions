@@ -269,6 +269,12 @@ describe('the component map', () => {
     expect(once('**a**', { components: { strong: null } })).toMatchObject({ html: 'a', reports: [] });
   });
 
+  it('reads an entry of `undefined` as none, so the entry of a lower layer applies', () => {
+    expect(once('**a**', { components: { strong: 'b' } }, { components: { strong: undefined } }).html).toBe('<b>a</b>');
+    expect(once('*a*', { components: { emphasis: undefined } }).html).toBe('<em>a</em>');
+    expect(once('a\n\nb', { components: { paragraph: undefined } }).reports.map(({ code }) => code)).toEqual(['node-unmapped', 'node-unmapped']);
+  });
+
   it('takes no prototype member for an entry', () => {
     const components = Object.create({ strong: 'b' }) as Options['components'];
 

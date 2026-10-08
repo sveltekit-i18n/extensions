@@ -321,6 +321,14 @@ describe('the component map', () => {
     expect(once('<b>a</b>', options, { components: { b: null } }).html).toBe('a');
     expect(once('<b>a</b>', { components: { b: null } }).html).toBe('a');
   });
+
+  it('reads an entry of `undefined` as none, so the entry of a lower layer applies', () => {
+    // Untyped, as JavaScript or a spread of optional props passes it.
+    const components = { b: undefined } as unknown as Options['components'];
+
+    expect(once('<b>a</b>', { components: { b: 'strong' } }, { components }).html).toBe('<strong>a</strong>');
+    expect(once('<b>a</b>', { components }).html).toBe('<b>a</b>');
+  });
 });
 
 describe('attributes from a translation', () => {
