@@ -322,6 +322,13 @@ describe('the component map', () => {
     expect(once('<b>a</b>', { components: { b: null } }).html).toBe('a');
   });
 
+  it('reports no tag a layer unmaps with `null`, and every tag no layer maps', () => {
+    expect(once('<b>a</b>', { components: { b: null } }).reports).toEqual([]);
+    expect(once('<b>a</b>', {}, { components: { b: null } }).reports).toEqual([]);
+    expect(once('<b>a</b>', { components: { b: 'strong' } }, { components: { b: null } }).reports).toEqual([]);
+    expect(once('<x>a</x>').reports.map(({ code, tag }) => [code, tag])).toEqual([['tag-unmapped', 'x']]);
+  });
+
   it('reads an entry of `undefined` as none, so the entry of a lower layer applies', () => {
     // Untyped, as JavaScript or a spread of optional props passes it.
     const components = { b: undefined } as unknown as Options['components'];
@@ -452,10 +459,13 @@ describe('reports', () => {
   });
 
   it('name the locale the message rendered in', () => {
-    const { reports } = once('', {}, { key: 'greeting', params: { name: 'Ann' }, locale: 'cs', components: { b: null } });
+    const { i18n, reports } = setup();
+
+    i18n.addTranslations({ cs: { tagged: 'Ahoj <x>{name}</x>' } });
+    render(i18n, () => ({ key: 'tagged', params: { name: 'Ann' }, locale: 'cs' })).destroy();
 
     expect(reports.map(({ code, tag, key, locale }) => [code, tag, key, locale])).toEqual([
-      ['tag-unmapped', 'b', 'greeting', 'cs'],
+      ['tag-unmapped', 'x', 'tagged', 'cs'],
     ]);
   });
 });

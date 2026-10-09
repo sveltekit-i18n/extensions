@@ -7,7 +7,7 @@
   import type { Element } from './parse.js';
   import { apply, hydrates, textOf } from './render.js';
   import Parts from './shared/Parts.svelte';
-  import { resolve } from './shared/resolve.js';
+  import { names, resolve } from './shared/resolve.js';
   import type { Components, Options, Report } from './types.js';
 
   type Props = {
@@ -78,9 +78,11 @@
 
   const lookup = ({ tag, implied }: Element) => {
     const resolved = resolve(tag, [DEFAULT_ELEMENTS, options.components, components]);
+    // An element the parser implied was never written, and `null` unmaps a
+    // tag on purpose: nothing to report.
+    const named = [options.components, components].some((layer) => names(layer, tag));
 
-    // An element the parser implied was never written: nothing to report.
-    if (resolved === undefined && !implied) {
+    if (resolved === undefined && !implied && !named) {
       report({
         code: 'tag-unmapped',
         tag,
