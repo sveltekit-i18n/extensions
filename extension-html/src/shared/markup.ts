@@ -18,7 +18,7 @@ export const withoutBidi = (value: string) => value.replace(BIDI_CONTROLS, '');
  */
 export const isAllowedUrl = (value: string, schemes: string[]) => {
   // eslint-disable-next-line no-control-regex
-  const url = value.replace(/[\t\n\r]/g, '').replace(/^[\u0000- ]+|[\u0000- ]+$/g, '');
+  const url = value.replace(/[\t\n\r]/g, '').replace(/^[\u0000- ]+/, '');
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(url)?.[1];
 
   return scheme === undefined || schemes.includes(scheme.toLowerCase());

@@ -112,6 +112,14 @@ describe('a crafted message', () => {
     // step takes at this size.
     expect(performance.now() - start).toBeLessThan(3_000);
   }, 30_000);
+
+  it('checks the scheme of a destination of any length in linear time', () => {
+    const start = performance.now();
+    const { dropped } = parse(`[x](<a${' '.repeat(400_000)}b>)`);
+
+    expect(dropped).toEqual([]);
+    expect(performance.now() - start).toBeLessThan(3_000);
+  }, 30_000);
 });
 
 // A node's type and attribute names, and its children's: what the syntax made

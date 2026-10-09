@@ -421,6 +421,15 @@ describe('attributes from a translation', () => {
     expect(markup.includes('href')).toBe(allowed);
     expect(reports.map(({ code }) => code)).toEqual(allowed ? [] : ['url-blocked']);
   });
+
+  it('checks a URL of any length in linear time', () => {
+    const start = performance.now();
+    const { dropped } = parse(`<a href="a${' '.repeat(400_000)}b">a</a>`);
+
+    expect(dropped).toEqual([]);
+    // A quadratic step takes minutes at this size.
+    expect(performance.now() - start).toBeLessThan(3_000);
+  }, 30_000);
 });
 
 describe('reports', () => {
