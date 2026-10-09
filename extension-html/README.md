@@ -89,7 +89,7 @@ An entry is
 
 A layer's entry replaces a lower layer's entry whole, props included: a usage's `a: Link` drops the `props` the option gave `a`. An entry of `undefined` is none, so a lower layer's entry applies.
 
-A tag no layer maps is unwrapped — its content renders, the tag does not — and reported. Tag names are matched in lower case, as HTML parses them. SVG and MathML are not HTML: their content renders as text, and each of their tags is reported as unmapped.
+A tag no layer maps is unwrapped — its content renders, the tag does not — and reported; one a layer unmaps with `null` is unwrapped without a report. Tag names are matched in lower case, as HTML parses them. SVG and MathML are not HTML: their content renders as text, and each of their tags is reported as unmapped.
 
 ### Block elements
 
@@ -172,7 +172,7 @@ type Report = {
 
 | Code | What happened |
 |------|---------------|
-| `tag-unmapped` | A tag no layer maps, or one of SVG or MathML: its content rendered without it. A tag the parser implied, such as a `<tbody>`, is not reported. |
+| `tag-unmapped` | A tag no layer maps, or one of SVG or MathML: its content rendered without it. A tag the parser implied, such as a `<tbody>`, and an HTML tag a layer unmaps with `null` are not reported. |
 | `tag-dropped` | A tag whose content is no text of the message, dropped with it. |
 | `attribute-dropped` | An attribute its tag does not allow, a value it does not take or that is unquoted, or one of a start tag the parser reports an error in. |
 | `url-blocked` | An `href` with a scheme that is not allowed. |
