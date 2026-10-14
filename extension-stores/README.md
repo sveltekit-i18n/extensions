@@ -42,10 +42,10 @@ The output is typed from the instance it wraps, so what the config narrows — t
 
 ## Pipe order
 
-The output is no instance, so this extension goes after every extension that needs one — placed after it, `typedAccess` and `html` throw at construction — and the stores follow what the extension before it hands over:
+The output is no instance, so this extension goes after every extension that needs one — placed after it, `typedAccess`, `html` and `markdown` throw at construction — and the stores follow what the extension before it hands over:
 
 - **`[typedAccess, stores]`**: [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) hands its tree to `$t`, `$t.home.title()` beside `$t('home.title')`, typed from the schema. `instance` is its output, and `instance.instance` the core.
-- **`[html(…), stores]`**: the stores carry no `T`; [`extension-html`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html)'s component is at `instance.T`.
+- **`[html(…), stores]`**: the stores carry no `T`; [`extension-html`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html)'s component is at `instance.T`, as [`extension-markdown`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-markdown)'s is with `[markdown(…), stores]`.
 - **`[typedAccess, html(…), stores]`** does both: `$t` carries the tree, and `instance.T` is the component.
 
 

@@ -139,9 +139,11 @@ Interpolation brings no Markdown: every string in `params`, at any depth, render
 
 The parser runs first and `<T>` reads what it returns, so the parser has to pass Markdown through. [`parser-curly`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-curly), [`parser-mf2`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-mf2) and [`parser-i18next`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-i18next) do.
 
-- With curly, a backslash before whitespace, `\`, `:`, `;`, `{` or `}` is curly's own escape: write a backslash break, or a backslash Markdown is to read, as `\\`.
+- With curly, a backslash before whitespace, `\`, `:`, `;`, `{` or `}` is curly's own escape: write a backslash break, or a backslash Markdown is to read, as `\\` (`\\\\` in a JSON catalogue).
 - With MF2, write Markdown as text: its own markup (`{#link}`) renders no element. The marks MF2 [isolates](https://github.com/sveltekit-i18n/parsers/tree/master/parser-mf2#bidi-isolation) a placeholder with are removed from a URL ([URLs](#urls)), and an autolink a placeholder fills (`<{$url}>`) is read without them.
-- [`parser-icu`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-icu) reads an autolink as a tag of its own rich-text syntax and fails the message. Pass `ignoreTag: true`:
+  MF2's text takes a backslash only before `\`, `{`, `}` and `|`. Any other — a Markdown escape such as `\*`, a backslash break, a backslash in a code span — fails the message, which comes back raw, its placeholders unresolved, and is reported. Write each backslash Markdown is to read as `\\`: `Price \\*5\\*`, or `line\\` before the line ending (`\\\\` in a JSON catalogue).
+- With i18next, keep its default `escapeValue: false`. With `true`, it writes a `/` of a value as `&#x2F;`, which then reads as a reference the message holds: text, a link's destination and a title decode it, while a code span and an autolink show it as written, and an autolink's `href` breaks.
+- [`parser-icu`](https://github.com/sveltekit-i18n/parsers/tree/master/parser-icu) reads an autolink as a tag of its own rich-text syntax and fails the message, which comes back raw, its placeholders unresolved. Pass `ignoreTag: true`:
 
   ```ts
   import icu from '@sveltekit-i18n/parser-icu';
