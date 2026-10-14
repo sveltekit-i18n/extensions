@@ -24,7 +24,7 @@ import html from '@sveltekit-i18n/extension-html';
 
 export const i18n = new I18n({
   ...config,
-  extensions: [html({ onReport: null })],
+  extensions: [html({ onReport: console.warn })],
 });
 ```
 
@@ -98,7 +98,7 @@ Block and structural elements are off by default. A `<T>` is often inside a `<p>
 ```ts
 import html, { BLOCK_ELEMENTS } from '@sveltekit-i18n/extension-html';
 
-html({ onReport: null, components: BLOCK_ELEMENTS });
+html({ onReport: console.warn, components: BLOCK_ELEMENTS });
 ```
 
 ```svelte
@@ -152,7 +152,7 @@ The parser runs first and `<T>` reads what it returns, so the parser has to pass
   ```ts
   import icu from '@sveltekit-i18n/parser-icu';
 
-  const parser = icu({ onReport: null, ignoreTag: true });
+  const parser = icu({ onReport: console.warn, ignoreTag: true });
   ```
 
 ## Reports
@@ -185,10 +185,10 @@ A report is made each time the message renders — on the server and again in th
 An extension whose output is no instance — such as [`extension-stores`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores) — goes after this one, and `T` is then at `instance.T`:
 
 ```ts
-export const { t, locale, instance: { T } } = new I18n({ ...config, extensions: [html({ onReport: null }), stores] });
+export const { t, locale, instance: { T } } = new I18n({ ...config, extensions: [html({ onReport: console.warn }), stores] });
 ```
 
-Put the other way round, `html` throws at construction, and its output type carries no `T`. [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) returns an output that is still an instance, so `html` may go after it and adds `T` beside the tree: `extensions: [typedAccess, html({ onReport: null })]`. `html` is a factory of the options: `extensions: [html]` and `html()` throw too.
+Put the other way round, `html` throws at construction, and its output type carries no `T`. [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) returns an output that is still an instance, so `html` may go after it and adds `T` beside the tree: `extensions: [typedAccess, html({ onReport: console.warn })]`. `html` is a factory of the options: `extensions: [html]` and `html()` throw too.
 
 [`extension-markdown`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-markdown) adds a `T` too, rendering Markdown: an instance takes one of the two, and the second of them in a pipe throws at construction rather than replace the first's `T`.
 

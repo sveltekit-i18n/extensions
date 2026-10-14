@@ -53,7 +53,7 @@ import html from '@sveltekit-i18n/extension-html';
 
 export const i18n = new I18n({
   ...config,
-  extensions: [html({ onReport: null })],
+  extensions: [html({ onReport: console.warn })],
 });
 ```
 
@@ -77,7 +77,7 @@ import markdown from '@sveltekit-i18n/extension-markdown';
 
 export const i18n = new I18n({
   ...config,
-  extensions: [markdown({ onReport: null })],
+  extensions: [markdown({ onReport: console.warn })],
 });
 ```
 
@@ -111,7 +111,7 @@ It composes with `extension-stores` placed after it (`extensions: [typedAccess, 
 
 ## Combining Extensions
 
-`extension-stores` goes last, since its output is no instance and the others need one: `extensions: [typedAccess, html({ onReport: null }), stores]` hands out `$t` with the tree, `$t.home.title()`, and the `T` component at `instance.T`. `extension-markdown` takes the place of `extension-html` there, never a place beside it.
+`extension-stores` goes last, since its output is no instance and the others need one: `extensions: [typedAccess, html(…), stores]` hands out `$t` with the tree, `$t.home.title()`, and the `T` component at `instance.T`. `extension-markdown` takes the place of `extension-html` there, never a place beside it.
 
 ## Creating Custom Extensions
 
