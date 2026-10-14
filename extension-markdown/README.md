@@ -24,7 +24,7 @@ import markdown from '@sveltekit-i18n/extension-markdown';
 
 export const i18n = new I18n({
   ...config,
-  extensions: [markdown({ onReport: null })],
+  extensions: [markdown({ onReport: console.warn })],
 });
 ```
 
@@ -148,7 +148,7 @@ The parser runs first and `<T>` reads what it returns, so the parser has to pass
   ```ts
   import icu from '@sveltekit-i18n/parser-icu';
 
-  const parser = icu({ onReport: null, ignoreTag: true });
+  const parser = icu({ onReport: console.warn, ignoreTag: true });
   ```
 
 ## Reports
@@ -179,10 +179,10 @@ A report is made each time the message renders — on the server and again in th
 An extension whose output is no instance — such as [`extension-stores`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-stores) — goes after this one, and `T` is then at `instance.T`:
 
 ```ts
-export const { t, locale, instance: { T } } = new I18n({ ...config, extensions: [markdown({ onReport: null }), stores] });
+export const { t, locale, instance: { T } } = new I18n({ ...config, extensions: [markdown({ onReport: console.warn }), stores] });
 ```
 
-Put the other way round, `markdown` throws at construction, and its output type carries no `T`. [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) returns an output that is still an instance, so `markdown` may go after it and adds `T` beside the tree: `extensions: [typedAccess, markdown({ onReport: null })]`. `markdown` is a factory of the options: `extensions: [markdown]` and `markdown()` throw too.
+Put the other way round, `markdown` throws at construction, and its output type carries no `T`. [`extension-typed-access`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-typed-access) returns an output that is still an instance, so `markdown` may go after it and adds `T` beside the tree: `extensions: [typedAccess, markdown({ onReport: console.warn })]`. `markdown` is a factory of the options: `extensions: [markdown]` and `markdown()` throw too.
 
 [`extension-html`](https://github.com/sveltekit-i18n/extensions/tree/master/extension-html) adds a `T` too, rendering markup: an instance takes one of the two, and the second of them in a pipe throws at construction rather than replace the first's `T`. An `extension-html` older than 3.0.3 does not check: after `markdown`, it replaces its `T` without a word.
 
