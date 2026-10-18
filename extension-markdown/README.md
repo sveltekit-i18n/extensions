@@ -50,7 +50,7 @@ The extension returns the instance it receives, so `new I18n(...)` stays the ins
 
 | Prop | Description |
 |------|-------------|
-| `key` | The key of the message. A key nothing translates renders as what the parser returns for it, read as Markdown, so a key is never built from untrusted data. |
+| `key` | The key of the message. A key nothing translates renders as `config.fallbackValue`, or else as the key itself, read as Markdown (no parser is asked), so a key is never built from untrusted data. |
 | `params` | The payload, as the first param of `t()`. Required where the `schema` requires it. |
 | `args` | The parser's params after the payload (curly's formatting props, ICU's `formats`), as an array. |
 | `locale` | Renders in this locale rather than the active one, as `l()` does. |
