@@ -1,6 +1,7 @@
 import { I18n } from '@sveltekit-i18n/base';
 import type { Parser } from '@sveltekit-i18n/base';
 import curly from '@sveltekit-i18n/parser-curly';
+import fluent from '@sveltekit-i18n/parser-fluent';
 import i18next from '@sveltekit-i18n/parser-i18next';
 import icu from '@sveltekit-i18n/parser-icu';
 import mf2 from '@sveltekit-i18n/parser-mf2';
@@ -13,7 +14,7 @@ import { render } from '../render';
 const NAME = '*Ann* & [Bob](/x) <i>';
 const OUTPUT = 'Hi <strong>*Ann* &amp; [Bob](/x) &lt;i&gt;</strong>, read <a href="/docs">the docs</a> or <a href="https://example.com">https://example.com</a>';
 
-// MF2 isolates each placeholder in U+2068 and U+2069.
+// MF2 and Fluent isolate each placeholder in U+2068 and U+2069.
 const withoutIsolates = (text: string) => text.replace(/[⁨⁩]/g, '');
 
 const rendered = <P extends Parser.Params>(parser: Parser.T<P>, message: string, props: Record<string, unknown> = {}, locale = 'en') => {
@@ -40,6 +41,15 @@ describe('the official parsers', () => {
 
   it('parser-i18next leaves the payload text', () => {
     expect(rendered(i18next({ onReport: null }), 'Hi **{{name}}**, read [the docs](/docs) or <https://example.com>', { params: { name: NAME } }).markup).toBe(OUTPUT);
+  });
+
+  it('parser-fluent leaves the payload text', () => {
+    expect(withoutIsolates(rendered(fluent({ onReport: null }), 'Hi **{ $name }**, read [the docs](/docs) or <https://example.com>', { params: { name: NAME } }).markup)).toBe(OUTPUT);
+  });
+
+  it('parser-fluent renders a line after the first that starts with `_` or an empty string literal', () => {
+    expect(rendered(fluent({ onReport: null }), 'See\n_this_ and __that__\n{ "" }[the docs](/docs/{ $slug })', { params: { slug: 'intro' } }))
+      .toEqual({ markup: 'See\n<em>this</em> and <strong>that</strong>\n\u2068\u2069<a href="/docs/intro">the docs</a>', reports: [] });
   });
 
   it('parser-icu leaves the payload text, and an autolink with `ignoreTag: true`', () => {
