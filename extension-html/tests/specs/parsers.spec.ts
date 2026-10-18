@@ -1,6 +1,7 @@
 import { I18n } from '@sveltekit-i18n/base';
 import type { Parser } from '@sveltekit-i18n/base';
 import curly from '@sveltekit-i18n/parser-curly';
+import fluent from '@sveltekit-i18n/parser-fluent';
 import i18next from '@sveltekit-i18n/parser-i18next';
 import icu from '@sveltekit-i18n/parser-icu';
 import mf2 from '@sveltekit-i18n/parser-mf2';
@@ -19,7 +20,7 @@ const renders = <P extends Parser.Params>(parser: Parser.T<P>, message: string) 
 
   page.destroy();
 
-  // MF2 isolates each placeholder in U+2068 and U+2069.
+  // MF2 and Fluent isolate a placeholder in U+2068 and U+2069.
   return markup.replace(/[⁨⁩]/g, '');
 };
 
@@ -34,6 +35,23 @@ describe('the official parsers', () => {
 
   it('parser-i18next passes markup through', () => {
     expect(renders(i18next({ onReport: null }), 'Hi <b>{{name}}</b>, read <a href="/docs">the docs</a>')).toBe(OUTPUT);
+  });
+
+  it('parser-fluent passes markup through', () => {
+    expect(renders(fluent({ onReport: null }), 'Hi <b>{ $name }</b>, read <a href="/docs">the docs</a>')).toBe(OUTPUT);
+  });
+
+  it('parser-fluent isolates a placeable in no attribute but `title`', () => {
+    const i18n = html({ onReport: null })(new I18n({
+      initLocale: 'en',
+      parser: fluent({ onReport: null }),
+      translations: { en: { k: '<a href="/docs/{ $slug }" title="By { $slug }">a</a>' } },
+    }));
+    const page = render(i18n, () => ({ key: 'k', params: { slug: 'intro' } }));
+    const markup = page.html();
+
+    page.destroy();
+    expect(markup).toBe('<a href="/docs/intro" title="By \u2068intro\u2069">a</a>');
   });
 
   it('parser-icu passes markup through with `ignoreTag: true`', () => {
